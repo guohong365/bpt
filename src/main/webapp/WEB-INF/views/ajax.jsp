@@ -341,7 +341,7 @@
 		  		content_url: function(url) {
 		  			return url;
 	  			},
-				default_url: "welcome"
+				default_url: "examine/list"
 			};
 			ace.enable_ajax_content($, options);
 	 	}

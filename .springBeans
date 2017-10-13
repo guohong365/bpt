@@ -16,7 +16,6 @@
 		<config>src/main/webapp/WEB-INF/spring/utility-beans.xml</config>
 	</configs>
 	<autoconfigs>
-		<config>src/main/webapp/WEB-INF/spring/root-task.xml</config>
 	</autoconfigs>
 	<configSets>
 		<configSet>
@@ -31,7 +30,6 @@
 				<config>src/main/webapp/WEB-INF/spring/controller-beans.xml</config>
 				<config>src/main/webapp/WEB-INF/spring/utility-beans.xml</config>
 				<config>src/main/webapp/WEB-INF/spring/appServlet/servlet-context.xml</config>
-				<config>src/main/webapp/WEB-INF/spring/root-task.xml</config>
 			</configs>
 			<profiles>
 			</profiles>

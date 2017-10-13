@@ -44,7 +44,7 @@
   </sql>
   <select id="selectByExample" parameterType="map" resultMap="examineMap">
     select <include refid="columns" /> from (
-      select <include refid="columns" /> 
+      select a.ID, a.MAC, a.STATUS, a.DATA, a.RECV_TIME
       from t_examine a
       left join t_device b on b.SERIAL_NO = a.MAC
       where b.ID is NULL 

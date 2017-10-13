@@ -4,8 +4,8 @@
 <html>
 	<head>
 		<meta charset="utf-8" />
-		<title>血压计租赁管理系统</title>		
-		<meta name="description" content="血压计租赁管理系统" />
+		<title>血压计厂家测试系统</title>		
+		<meta name="description" content="血压计厂家测试系统" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="pragma" content="no-cache">
     <meta http-equiv="cache-control" content="no-cache">
@@ -49,8 +49,8 @@
 					<div class="col-sm-10 col-sm-offset-1">
 						<div class="login-container">
 							<div class="center">
-								<h1><span class="white">血压计租赁管理系统</span></h1>
-								<h4 class="blue">&copy; xxxx公司</h4>
+								<h1><span class="white">血压计厂家测试系统</span></h1>
+								<h4 class="blue">仅供厂家测试</h4>
 							</div>
 
 							<div class="space-6"></div>

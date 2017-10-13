@@ -94,6 +94,7 @@ public class DataReveiverControllerImpl extends LoggerSupportorImpl {
 			@RequestParam(value="Sts", required=true)
 			String status){
 		DeviceStatus detial=new DeviceStatus(mac, Integer.parseInt(status), Integer.parseInt(battery), new Date());
+		
 		getServcie().insertStatus(mac,detial);		
 		return getReturnString();
 	}

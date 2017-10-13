@@ -55,16 +55,13 @@ public class StatusSender {
 						Thread.sleep(50);
 					} catch (Exception e) {
 						e.printStackTrace(System.err);
-						try {
-							Thread.sleep(30000L);
-						} catch (InterruptedException e1) {
-						}
+						return;
 					}
 				}
 				try {
 					Thread.sleep(30000L);
 				} catch (InterruptedException e) {
-					e.printStackTrace(System.err);
+					e.printStackTrace(System.err);					
 				}
 			}
 		}
