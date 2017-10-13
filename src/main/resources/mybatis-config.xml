@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration
+        PUBLIC "-//ibatis.apache.org//DTD Config 3.0//EN"
+        "http://ibatis.apache.org/dtd/ibatis-3-config.dtd">
+<configuration>
+    <settings>
+        <setting name="cacheEnabled" value="false" />
+        <setting name="lazyLoadingEnabled" value="false" />
+        <setting name="aggressiveLazyLoading" value="true"/>
+    </settings>
+    <mappers>
+      <!--  
+      <mapper resource="com/uc/app/zjjh/persistence/UserDetailMapper.xml"/>
+      <mapper resource="com/uc/app/zjjh/persistence/RoleDetailMapper.xml"/>
+      <mapper resource="com/uc/app/zjjh/persistence/AnnualReportDetailMapper.xml"/>
+      <mapper resource="com/uc/haarp/persistence/ArticleMapper.xml" />
+      <mapper resource="com/uc/haarp/persistence/CodeAreaMapper.xml" />
+      <mapper resource="com/uc/haarp/persistence/ExWorkEmployeeMapper.xml" />
+      <mapper resource="com/uc/haarp/persistence/ExWorkRecordMapper.xml"/>
+      <mapper resource="com/uc/haarp/persistence/FunctionMapper.xml"/>
+      <mapper resource="com/uc/haarp/persistence/MenuMapper.xml"/>
+      <mapper resource="com/uc/haarp/persistence/ModifyApplicationDetailMapper.xml"/>
+      <mapper resource="com/uc/haarp/persistence/ModifyApplicationMapper.xml"/>
+      <mapper resource="com/uc/haarp/persistence/ObjectsMapper.xml"/>      
+      <mapper resource="com/uc/haarp/persistence/OrgFuncMapper.xml"/>
+      <mapper resource="com/uc/haarp/persistence/OrgMapper.xml"/>
+      <mapper resource="com/uc/haarp/persistence/RoleFuncMapper.xml"/>
+      
+      <mapper resource="com/uc/haarp/persistence/UserMapper.xml"/>
+      <mapper resource="com/uc/haarp/persistence/UserRoleMapper.xml"/>
+      <mapper resource="com/uc/haarp/persistence/UserSettingsMapper.xml"/>
+      <mapper resource="com/uc/haarp/persistence/VAnnualReportDetailMapper.xml"/>
+      <mapper resource="com/uc/haarp/persistence/VArticleDetailMapper.xml"/>
+      <mapper resource="com/uc/haarp/persistence/VExWorkEmployeeDetailMapper.xml"/>
+      <mapper resource="com/uc/haarp/persistence/VMenuFuncMapper.xml"/>
+      <mapper resource="com/uc/haarp/persistence/VModifyApplicationListMapper.xml"/>      
+      <mapper resource="com/uc/haarp/persistence/VOrgDetailMapper.xml"/>
+      <mapper resource="com/uc/haarp/persistence/VRoleFuncMapper.xml"/>
+      <mapper resource="com/uc/haarp/persistence/VUserDetailMapper.xml"/>
+      <mapper resource="com/uc/haarp/persistence/VUserMenuMapper.xml"/>
+      <mapper resource="com/uc/haarp/persistence/VUserRoleMapper.xml"/>
+      <mapper resource="com/uc/haarp/persistence/custom/AnnualReportDetailMapper.xml"/>
+      <mapper resource="com/uc/haarp/persistence/custom/ApplyListMapper.xml"/>
+      <mapper resource="com/uc/haarp/persistence/custom/ArticleDetailMapper.xml"/>
+      <mapper resource="com/uc/haarp/persistence/custom/CodeTableMapper.xml"/>
+      <mapper resource="com/uc/haarp/persistence/custom/ExWorkEmployeeDetailMapper.xml"/>
+      <mapper resource="com/uc/haarp/persistence/custom/ExWorkRecordDetailMapper.xml"/>
+      <mapper resource="com/uc/haarp/persistence/custom/ObjectsDetailMapper.xml"/>      
+      <mapper resource="com/uc/haarp/persistence/custom/OrgDetailMapper.xml"/>
+      <mapper resource="com/uc/haarp/persistence/custom/RoleDetailMapper.xml"/>
+      <mapper resource="com/uc/haarp/persistence/custom/StatAnnualReportMapper.xml"/>
+      <mapper resource="com/uc/haarp/persistence/custom/StatPersonalWorkloadMapper.xml"/>
+      <mapper resource="com/uc/haarp/persistence/custom/StatWorkloadMapper.xml"/>
+      <mapper resource="com/uc/haarp/persistence/custom/UserDetailMapper.xml"/>
+      <mapper resource="com/uc/haarp/persistence/custom/UserInfoMapper.xml"/>
+      <mapper resource="com/uc/haarp/persistence/custom/ApplyExRecordDetailMapper.xml" />
+      <mapper resource="com/uc/haarp/persistence/custom/ApplyReportDetailMapper.xml" />
+      <mapper resource="com/uc/haarp/persistence/custom/UpdateModifyFlagMapper.xml"/>
+      <mapper resource="com/uc/haarp/persistence/custom/ClearTimeModifyApplicationMapper.xml"/>
+      -->
+    </mappers>
+</configuration>

@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.uc.bpg.persistence.CheckInMapper">
+  <resultMap id="checkInRecordDetail" type="com.uc.bpg.domain.CheckIn">
+    <id column="ID" jdbcType="INTEGER" property="id" />
+    <result column="UUID" jdbcType="CHAR" property="uuid" />
+    <result column="HOTEL" jdbcType="INTEGER" property="hotel" />
+    <result column="ROOM" jdbcType="INTEGER" property="room" />
+    <result column="ROOM_NO" jdbcType="VARCHAR" property="roomNo"/>    
+    <result column="CHECK_IN_TIME" jdbcType="TIMESTAMP" property="checkInTime" />
+    <result column="CHECK_IN_RECEPTIONIST" jdbcType="INTEGER" property="checkInReceptionist" />
+    <result column="CHECK_IN_RECEPTIONIST_NAME" jdbcType="VARCHAR" property="checkInReceptionistName"/>
+    <result column="CHECK_OUT_TIME" jdbcType="TIMESTAMP" property="checkOutTime" />
+    <result column="CHECK_OUT_RECEPTIONIST" jdbcType="INTEGER" property="checkOutReceptionist" />
+    <result column="CHECK_OUT_RECEPTIONIST_NAME" jdbcType="VARCHAR" property="checkOutReceptionistName"/>    
+    <result column="USE_TIMES" jdbcType="INTEGER" property="useTimes"/>
+    <result column="CHARGING" jdbcType="DECIMAL" property="charging"/>
+    <result column="CHARGE" jdbcType="DECIMAL" property="charge"/>
+    <result column="CHARGE_STANDARD" jdbcType="DECIMAL" property="chargeStandard"/>
+  </resultMap>
+
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="selectSql">
+   select 
+     a.ID, a.HOTEL, a.ROOM, a.CHECK_IN_TIME, a.CHECK_IN_RECEPTIONIST, a.CHECK_OUT_TIME, a.CHECK_OUT_RECEPTIONIST,
+     b.STOREY, b.ROOM_NO, b.VALID, b.ID as ROOM_ID,
+     c.NAME as CHECK_IN_RECEPTIONIST_NAME,
+     d.NAME as CHECK_OUT_RECEPTIONIST_NAME,
+     (
+        select count(*) 
+        from t_device_usage s 
+        where s.ROOM=a.ROOM and s.USE_TIME &gt;= a.CHECK_IN_TIME and s.USE_TIME &lt;= ifnull(a.CHECK_OUT_TIME, 
+        <choose>
+        <when test="queryForm!=null and queryForm.queryNow!=null">
+          #{queryForm.queryNow,jdbcType=TIMESTAMP}
+        </when>
+        <otherwise>now()</otherwise>
+        </choose>
+        )  
+        group by s.ROOM) as USE_TIMES,
+     (
+        select sum(s.charge) as CHARGE 
+        from t_device_usage s  
+        where s.ROOM=a.ROOM and s.USE_TIME &gt;= a.CHECK_IN_TIME and s.USE_TIME &lt;=ifnull(a.CHECK_OUT_TIME,
+        <choose>
+        <when test="queryForm!=null and queryForm.queryNow!=null">
+          #{queryForm.queryNow,jdbcType=TIMESTAMP}
+        </when>
+        <otherwise>now()</otherwise>
+        </choose>         
+        ) 
+        group by s.ROOM) as CHARGE
+ from t_check_in a
+ left join t_room b on b.ID=a.ROOM 
+ left join t_user c on c.ID=a.CHECK_IN_RECEPTIONIST
+ left join t_user d on d.ID=a.CHECK_OUT_RECEPTIONIST
+  </sql>
+  <sql id="columns">
+    ID, UUID, HOTEL, ROOM, CHECK_IN_TIME, CHECK_IN_RECEPTIONIST, CHECK_OUT_TIME, 
+    CHECK_OUT_RECEPTIONIST
+  </sql>
+  <select id="selectByExample" parameterType="map" resultMap="checkInRecordDetail">
+    select
+    <include refid="columns" />
+    from t_check_in
+    <if test="example != null">
+      <include refid="Example_Where_Clause" />
+    
+    <if test="example.orderByClause != null">
+      order by ${example.orderByClause}
+    </if>
+    </if>
+    limit ${offset},${count}
+  </select>
+  <select id="selectById" parameterType="java.lang.Long" resultMap="checkInRecordDetail">
+    select 
+    <include refid="columns" />
+    from t_check_in
+    where ID = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteDetail" parameterType="com.uc.bpg.domain.CheckIn">
+    delete from t_check_in
+    where ID = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insertDetail" parameterType="com.uc.bpg.domain.CheckIn">
+    insert into t_check_in (UUID, HOTEL, 
+      ROOM, CHECK_IN_TIME, 
+      CHECK_IN_RECEPTIONIST, CHECK_OUT_TIME, CHECK_OUT_RECEPTIONIST
+      )
+    values (#{uuid,jdbcType=CHAR}, #{hotel,jdbcType=INTEGER}, 
+      #{room,jdbcType=INTEGER}, #{checkInTime,jdbcType=TIMESTAMP}, 
+      #{checkInReceptionist,jdbcType=INTEGER}, #{checkOutTime,jdbcType=TIMESTAMP}, #{checkOutReceptionist,jdbcType=INTEGER}
+      )
+  </insert>
+  <select id="selectCountByExample" parameterType="map" resultType="java.lang.Long">
+    select count(*) from t_check_in
+    <if test="example != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateDetailSelective" parameterType="com.uc.bpg.domain.CheckIn">
+    update t_check_in
+    <set>
+      <if test="hotel != null">
+        HOTEL = #{hotel,jdbcType=INTEGER},
+      </if>
+      <if test="room != null">
+        ROOM = #{room,jdbcType=INTEGER},
+      </if>
+      <if test="checkInTime != null">
+        CHECK_IN_TIME = #{checkInTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="checkInReceptionist != null">
+        CHECK_IN_RECEPTIONIST = #{checkInReceptionist,jdbcType=INTEGER},
+      </if>
+      <if test="checkOutTime != null">
+        CHECK_OUT_TIME = #{checkOutTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="checkOutReceptionist != null">
+        CHECK_OUT_RECEPTIONIST = #{checkOutReceptionist,jdbcType=INTEGER},
+      </if>
+    </set>
+    where ID = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateDetail" parameterType="com.uc.bpg.domain.CheckIn">
+    update t_check_in
+    set
+      HOTEL = #{hotel,jdbcType=INTEGER},
+      ROOM = #{room,jdbcType=INTEGER},
+      CHECK_IN_TIME = #{checkInTime,jdbcType=TIMESTAMP},
+      CHECK_IN_RECEPTIONIST = #{checkInReceptionist,jdbcType=INTEGER},
+      CHECK_OUT_TIME = #{checkOutTime,jdbcType=TIMESTAMP},
+      CHECK_OUT_RECEPTIONIST = #{checkOutReceptionist,jdbcType=INTEGER}
+    where ID = #{id,jdbcType=INTEGER}
+  </update>
+  <select id="selectOptimized" parameterType="com.uc.bpg.forms.CheckInQueryForm" resultMap="checkInRecordDetail">
+    <include refid="selectSql" />
+  <if test="queryForm!=null">
+    <where>
+    <trim prefixOverrides="and">
+      <if test="queryForm.queryHotel !=null">
+        and a.HOTEL=#{queryForm.queryHotel,jdbcType=INTEGER}
+      </if>
+      <if test="queryForm.queryRoomNo !=null">
+        and b.ROOM_NO like '${queryForm.queryRoomNo}%'
+      </if>
+      <if test="queryForm.queryCheckInReceptionistName!=null">
+        and c.NAME like '${queryForm.queryCheckInReceptionistName}%'
+      </if>
+      <if test="queryForm.queryCheckOutReceptionistName!=null">
+        and d.NAME like '${queryForm.queryCheckOutReceptionistName}%'
+      </if>      
+    </trim>    
+    </where>
+    <if test="queryForm.queryOrderByClause!=null">
+      order by ${queryForm.queryOrderByClause}
+    </if>
+  </if>
+  limit ${offset}, ${count} 
+  </select>
+  <select id="selectCountOptimized"  parameterType="com.uc.bpg.forms.CheckInQueryForm" resultType="java.lang.Long" >
+  select count(*) 
+  from t_check_in a
+ left join t_room b on b.ID=a.ROOM 
+ left join t_user c on c.ID=a.CHECK_IN_RECEPTIONIST
+ left join t_user d on d.ID=a.CHECK_OUT_RECEPTIONIST
+  <if test="queryForm!=null">
+    <where>
+    <trim prefixOverrides="and">
+      <if test="queryForm.queryHotel !=null">
+        and a.HOTEL=#{queryForm.queryHotel,jdbcType=INTEGER}
+      </if>
+      <if test="queryForm.queryRoomNo !=null">
+        and b.ROOM_NO like '${queryForm.queryRoomNo}%'
+      </if>
+      <if test="queryForm.queryCheckInReceptionistName!=null">
+        and c.NAME like '${queryForm.queryCheckInReceptionistName}%'
+      </if>
+      <if test="queryForm.queryCheckOutReceptionistName!=null">
+        and d.NAME like '${queryForm.queryCheckOutReceptionistName}%'
+      </if>      
+    </trim>    
+    </where>
+  </if>
+  </select>
+</mapper>

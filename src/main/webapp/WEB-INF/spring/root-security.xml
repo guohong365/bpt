@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:sec="http://www.springframework.org/schema/security"
+	xsi:schemaLocation="http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-4.0.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.1.xsd">
+
+    <sec:http use-expressions="true" auto-config="false">
+      <sec:intercept-url pattern="/resources/**" access="permitAll" /> 
+      <sec:intercept-url pattern="/403" access="permitAll" />
+      <sec:intercept-url pattern="/404" access="permitAll"/>     
+      <sec:intercept-url pattern="/500" access="permitAll"/>
+      <sec:intercept-url pattern="/login*" access="permitAll"/>
+      <sec:intercept-url pattern="/captcha*" access="permitAll"/>
+      <sec:intercept-url pattern="/data/**"  access="permitAll"/>
+      
+      <sec:intercept-url pattern="/**" access="IS_AUTHENTICATED_ANONYMOUSLY" />
+      <sec:csrf disabled="true"/>
+      <sec:form-login
+        login-page="/login"
+        password-parameter="password"
+        username-parameter="userId"
+        authentication-failure-url="/login?error=true"
+        default-target-url="/"
+        always-use-default-target="true"        
+        />
+      <sec:logout logout-success-url="/login" logout-url="/logout" />
+      <sec:session-management invalid-session-url="/login">
+      </sec:session-management>
+      <sec:custom-filter ref="securityFilter" before="FILTER_SECURITY_INTERCEPTOR" />
+      <sec:access-denied-handler error-page="/403"/>
+    </sec:http>
+    
+    
+    
+    <sec:authentication-manager alias="authenticationManager">      
+      <sec:authentication-provider user-service-ref="basicUserDetailsService" >
+        <sec:password-encoder hash="md5" />
+      </sec:authentication-provider>
+    </sec:authentication-manager>
+<!--     
+    <bean id="csrfRepository" class="org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository" />
+-->
+    <bean id="basicUserDetailsService"
+      class="com.uc.web.security.basic.IntegerWebUserDetailService" >
+      <property name="securityService" ref="securityService" />
+    </bean>
+    
+    <bean id="securityFilter" class="org.springframework.security.web.access.intercept.FilterSecurityInterceptor" >
+      <property name="securityMetadataSource" ref="securityMetadataSource" />
+      <property name="authenticationManager" ref="authenticationManager" />
+      <property name="accessDecisionManager" ref="consensusBased" />      
+    </bean>
+    
+    <bean id="securityMetadataSource" class="org.springframework.security.web.access.intercept.DefaultFilterInvocationSecurityMetadataSource">
+      <constructor-arg type="java.util.LinkedHashMap" ref="securityRequestMapFactoryBean" />
+    </bean>
+    
+    <bean id="securityRequestMapFactoryBean"
+      class="com.uc.web.security.basic.IntegerSecurityMetadataSourceFactoryBean"> 
+      <property name="securityService" ref="securityService" />
+    </bean>
+       
+    
+    <!-- AffirmativeBased 认证管理器  全部满足-->
+    <bean id="affirmativeBased" class="org.springframework.security.access.vote.AffirmativeBased">
+      <constructor-arg >
+        <list>
+          <bean class="org.springframework.security.access.vote.RoleVoter" />
+        </list>
+      </constructor-arg>
+    </bean>    
+    
+    <bean id="consensusBased" class="org.springframework.security.access.vote.ConsensusBased">
+      <constructor-arg>
+        <bean class="org.springframework.security.access.vote.RoleVoter" />
+      </constructor-arg>
+    </bean>
+    
+    <bean id="unanimousBased" class="org.springframework.security.access.vote.UnanimousBased">
+      <constructor-arg>
+        <bean class="org.springframework.security.access.vote.RoleVoter" />
+      </constructor-arg>
+    </bean>
+    
+    <!-- 验证码相关 -->
+    <bean id="captchaGenerator" class="com.uc.web.utils.captcha.DetaultCaptchaGenerator" >
+      <property name="captchaCharSet" value="0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz" />
+    </bean>
+    
+    <bean id="charImageGenerator" class="com.uc.web.utils.captcha.RandomCharImageCaptchaGeneratorImpl2" />
+    
+    <bean id="captchaService" class="com.uc.web.utils.captcha.RandomCharImageCaptcha">
+      <property name="captchaCount" value="4" />
+      <property name="captchaKey" value="captchaKey" />
+      <property name="captchaValueName" value="captcha" />
+      <property name="captchaGenerator" ref="captchaGenerator" />
+      <property name="charImageGenerator" ref="charImageGenerator" />
+      <property name="imageWidth" value="80" />
+      <property name="imageHeight" value="26" />
+      <property name="successValue" value="OK" />
+      <property name="failureValue" value="ERROR" />
+    </bean>
+
+</beans>

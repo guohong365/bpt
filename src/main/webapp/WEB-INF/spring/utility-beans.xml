@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+  <!-- beans utilities -->
+  <bean id="springConfigTool" class="com.uc.web.utils.SpringConfigTool" />
+  
+  <bean id="deviceBatchFileParser" class="com.uc.bpg.uitls.DeviceBatchFileParserImpl" />
+
+  <bean id="menuFormator" class="com.uc.web.forms.ui.TreeViewFormator" >
+    <property name="containerProvider" ref="menuContainer" />
+    <property name="nodeFormatorProvider" ref="nodeFormatorProvider" />
+  </bean>
+  
+  <bean id="menuContainer" class="com.uc.web.forms.ui.ace.AceMenuContainerProvider" />
+  
+  <bean id="nodeFormatorProvider" class="com.uc.web.forms.ui.NodeFormatorProviderImpl" >
+    <property name="topMenuItemFormator" ref="submenuFormator" />
+    <property name="subMenuItemFormator" ref="submenuFormator" />
+    <property name="leafMenuItemFormator" ref="menuitemFormator" />
+  </bean>
+  
+  <bean id="submenuFormator" class="com.uc.web.forms.ui.ace.AceSubMenuItemFormator">
+    <property name="containerProvider" ref="submenuContainerProvider" />
+  </bean>
+  
+  <bean id="menuitemFormator" class="com.uc.web.forms.ui.ace.AceMenuItemFormator" />
+  
+  <bean id="submenuContainerProvider" class="com.uc.web.forms.ui.ace.AceSubmenuContainer" />
+
+</beans>

@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.uc.bpg.persistence.ChargingMapper">
+  <resultMap id="chargingRecordDetail" type="com.uc.bpg.domain.Charging">
+    <id column="ID" jdbcType="INTEGER" property="id" />
+    <result column="UUID" jdbcType="CHAR" property="uuid" />
+    <result column="CHECK_IN" jdbcType="INTEGER" property="checkIn" />
+    <result column="CHARGE" jdbcType="DECIMAL" property="charge" />
+    <result column="CHARGE_STANDARD" jdbcType="DECIMAL" property="chargeStandard"/>
+    <result column="RENT" jdbcType="DECIMAL" property="rent"/>
+    <result column="RECEPTIONIST" jdbcType="INTEGER" property="receptionist" />
+    <result column="CHARGING_TIME" jdbcType="TIMESTAMP" property="chargingTime" />
+  </resultMap>
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="columns">
+    ID, UUID,HOTEL, CHECK_IN, CHARGE,CHARGE_STANDARD,RENT, RECEPTIONIST, 
+    CHARGING_TIME, RECEPTIONIST_NAME
+  </sql>
+  <select id="selectByExample" parameterType="map" resultMap="chargingRecordDetail">
+    select
+    <include refid="columns" />
+    from t_charging
+    <if test="example != null">
+      <include refid="Example_Where_Clause" />
+      <if test="example.orderByClause != null">
+        order by ${example.orderByClause}
+      </if>  
+    </if>
+  </select>
+  <select id="selectById" parameterType="java.lang.Long" resultMap="chargingRecordDetail">
+    select 
+    <include refid="columns" />
+    from t_charging
+    where ID = #{id,jdbcType=INTEGER}
+  </select>
+  <insert id="insertDetail" parameterType="com.uc.bpg.domain.Charging">
+    insert into t_charging (UUID, HOTEL, CHECK_IN, CHARGE, CHARGE_STANDARD, RENT, RECEPTIONIST, CHARGING_TIME)
+    values (#{uuid,jdbcType=CHAR}, #{hotel,jdbcType=INTEGER}, 
+      #{checkIn,jdbcType=INTEGER}, #{charge,jdbcType=DECIMAL},
+      #{chargeStandard,jdbcType=DECIMAL},#{rent,jdbcType=DECIMAL}, #{receptionist,jdbcType=INTEGER}, #{chargingTime,jdbcType=TIMESTAMP})
+  </insert>
+  <select id="selectCountByExample" parameterType="map" resultType="java.lang.Long">
+    select count(*) from t_charging
+    <if test="example != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+    
+  <select id="selectChargingStandard" parameterType="list" resultType="java.math.BigDecimal">
+    select sum(CHARGE_STANDARD) from t_device_usage where ID in 
+    <foreach collection="ids" item="id" open="(" close=")" separator=",">
+      #{id}
+    </foreach>
+  </select>
+</mapper>

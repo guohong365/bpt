@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+<import resource="page-generator.xml"/>
+<import resource="class-generator.xml"/>
+
+<bean id="autoGenerator" class="com.uc.web.tools.generator.AutoGeneratorImpl">
+  <property name="generators">
+    <list>
+      <ref bean="listServiceInterfaceGenertator"/>
+      <ref bean="detailServiceInterfaceGenerator"/>
+      <ref bean="listServiceGenerator"/>
+      <ref bean="detailServiceGenerator"/>
+      <ref bean="listControllerInterfaceGenerator"/>
+      <ref bean="detailControllerInterfaceGenerator"/>
+      <ref bean="listControllerGenerator"/>
+      <ref bean="detailControllerGenerator"/>
+      <ref bean="listControllerProxyGenerator"/>
+      <ref bean="detailControllerProxyGenerator"/>
+      
+      <ref bean="listPageGenerator"/>
+      <ref bean="detailModifyPageGenerator"/>
+      <ref bean="detailViewPageGenerator"/>
+    </list>
+  </property>
+</bean>
+
+</beans>

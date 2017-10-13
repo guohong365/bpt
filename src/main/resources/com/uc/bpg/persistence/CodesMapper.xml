@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.uc.bpg.persistence.CodesMapper">
+<resultMap type="com.uc.web.domain.CodeImpl" id="codeMap">
+  <id column="CODE" jdbcType="INTEGER" property="code"/>
+  <result column="VALUE" jdbcType="VARCHAR" property="value"/>
+  <result column="VALID" jdbcType="BIT" property="valid"/>
+</resultMap>
+  <resultMap type="com.uc.bpg.domain.MenuTreeItemImpl" id="mentTreeItem" >
+    <id column="ID" jdbcType="INTEGER" property="id" />
+    <result column="PARENT" jdbcType="INTEGER" property="parent" />
+    <result column="NAME" jdbcType="VARCHAR" property="name" />
+    <result column="ORDER" jdbcType="INTEGER" property="order" />
+    <result column="ICON" jdbcType="VARCHAR" property="icon" />
+    <result column="URI" jdbcType="VARCHAR" property="uri"/>
+    <result column="VALID" jdbcType="BIT" property="valid"/>  
+  </resultMap>
+<select id="selectTypes" parameterType="java.lang.Boolean" resultMap="codeMap">
+  select ID as CODE, concat_ws(' ',PRODUCT, NAME) as VALUE, VALID from t_type
+  <if test="forEdit">
+  where VALID
+  </if> 
+  order by SHOW_ORDER;
+</select>
+<select id="selectAllMenus" resultMap="mentTreeItem">
+  select a.ID, a.PARENT, a.NAME, a.ORDER, a.ICON, b.URI
+  from t_menu a 
+  left join t_function b on a.FUNC=b.ID
+  where 
+  (b.VALID or isnull(b.VALID))
+  and a.VALID
+  order by a.ORDER
+</select>
+<select id="selectOrgCodes" parameterType="map" resultMap="codeMap">
+  select `ID` as `CODE`, `NAME` as `VALUE`, `VALID` 
+  from `t_orgnization`
+  <where>
+    <trim prefixOverrides="and">
+       <if test="type=='酒店' or type=='公司'">
+         and `TYPE`= #{type,jdbcType=VARCHAR}
+       </if>
+       <if test="forEdit">
+         and `VALID` = true
+       </if>
+    </trim>
+  </where>
+</select>
+<select id="selectAllocableHotelCodes" resultMap="codeMap">
+  select ID as CODE, NAME as VALUE, VALID
+  from t_orgnization a
+  where
+    a.VALID 
+  and TYPE = '酒店'  
+  and a.TOTAL_DEVICE &gt; (select count(*) from t_device b where b.HOTEL=a.ID)   
+</select>
+</mapper>

@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.uc.bpg.persistence.RoleMapper">
+  <resultMap id="roleDetail" type="com.uc.bpg.domain.RoleImpl">
+    <id column="ID" jdbcType="INTEGER" property="id" />
+    <result column="UUID" jdbcType="CHAR" property="uuid" />
+    <result column="NAME" jdbcType="VARCHAR" property="name" />
+    <result column="DESCRIPTION" jdbcType="VARCHAR" property="description" />
+    <result column="VALID" jdbcType="BIT" property="valid" />
+    <result column="INTERNAL" jdbcType="BIT" property="internal" />
+  </resultMap>
+  <resultMap type="com.uc.bpg.domain.FunctionAvailable" id="functionAvailable">
+    <result column="ID" jdbcType="INTEGER" property="id"/>
+    <result column="NAME" jdbcType="VARCHAR" property="name"/>
+    <result column="DESCRIPTION" jdbcType="VARCHAR" property="description"/>
+    <result column="AVAILABLE" jdbcType="BIT" property="available"/>
+  </resultMap>
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="cloumns">
+    ID, UUID, NAME, DESCRIPTION, VALID, INTERNAL
+  </sql>
+  <select id="selectByExample" parameterType="map" resultMap="roleDetail">
+    select
+    <include refid="cloumns" />
+    from t_role
+    <if test="example != null">
+      <include refid="Example_Where_Clause" />
+      <if test="example.orderByClause != null">
+        order by ${example.orderByClause}
+      </if>  
+    </if>
+  </select>
+  <select id="selectById" parameterType="java.lang.Long" resultMap="roleDetail">
+    select 
+    <include refid="cloumns" />
+    from t_role
+    where ID = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteDetail" parameterType="com.uc.bpg.domain.RoleImpl">
+    delete from t_role
+    where ID = #{id,jdbcType=INTEGER}
+  </delete>
+  
+  <sql id="updateRoleFunctions">
+    <if test="functions!=null">
+      delete from t_role_func where ROLE=#{id, jdbcType=INTEGER};
+      <foreach collection="functions" item="func">
+        <if test="func.available">
+        insert into t_role_func (ROLE, FUNC) values (#{id,jdbcType=INTEGER},#{func.id,jdbcType=INTEGER});
+        </if>
+      </foreach>
+    </if>
+  </sql>  
+  <insert id="insertDetail" parameterType="com.uc.bpg.domain.RoleImpl">
+    insert into t_role (UUID, NAME,  DESCRIPTION, VALID, INTERNAL )
+    values (#{uuid,jdbcType=CHAR}, #{name,jdbcType=VARCHAR}, #{description,jdbcType=VARCHAR}, true, false);
+    <if test="functions!=null">
+      <foreach collection="functions" item="func">
+        <if test="func.available">
+        insert into t_role_func(ROLE, FUNC) select ID, ${func.id} from t_role where UUID=#{uuid,jdbcType=CHAR};
+        </if>
+      </foreach>
+    </if>  
+  </insert>
+  <select id="selectCountByExample" parameterType="map" resultType="java.lang.Long">
+    select count(*) from t_role
+    <if test="example != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateDetailSelective" parameterType="com.uc.bpg.domain.RoleImpl">
+    update t_role
+    <set>
+      <if test="name != null">
+        NAME = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="description != null">
+        DESCRIPTION = #{description,jdbcType=VARCHAR},
+      </if>
+      <if test="valid != null">
+        VALID = #{valid,jdbcType=BIT},
+      </if>
+      <if test="internal != null">
+        INTERNAL = #{internal,jdbcType=BIT},
+      </if>
+    </set>
+    where ID = #{id,jdbcType=INTEGER};
+    <include refid="updateRoleFunctions" />
+  </update>
+  <update id="updateDetail" parameterType="com.uc.bpg.domain.RoleImpl">
+    update t_role
+    set 
+      NAME = #{name,jdbcType=VARCHAR},
+      DESCRIPTION = #{description,jdbcType=VARCHAR},
+      VALID = #{valid,jdbcType=BIT},
+      INTERNAL = #{internal,jdbcType=BIT}
+    where ID = #{id,jdbcType=INTEGER};
+    <include refid="updateRoleFunctions" />
+  </update>
+  
+  <select id="selectFunctions" parameterType="map" resultMap="functionAvailable">
+    <choose>
+      <when test="roleId!=null and roleId &gt; 0">
+        select a.ID, a.NAME, a.DESCRIPTION, if(not b.ROLE is null, true, false) as AVAILABLE 
+        from t_function a
+        left join t_role_func b on b.FUNC=a.ID and b.ROLE=#{roleId,jdbcType=INTEGER}
+        where a.VALID
+        <if test="!isAll">
+          and not b.ROLE is null
+        </if>
+      </when>
+      <otherwise>
+        select ID, NAME, DESCRIPTION, false as AVAILABLE from t_function
+        where VALID
+      </otherwise>
+    </choose>
+  </select>
+  
+</mapper>

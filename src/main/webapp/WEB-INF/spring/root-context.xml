@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.1.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.1.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.1.xsd">
+	
+	<!-- Root Context: defines shared resources visible to all other web components -->
+  <context:property-placeholder location="classpath:jdbc.properties" />
+
+  <!-- jdbc settings -->
+  <!-- druid data source  -->
+  <bean id="dataSource"
+    class="com.alibaba.druid.pool.DruidDataSource"
+    init-method="init" destroy-method="close">
+    <property name="url" value="${jdbc_url}" />
+    <property name="username" value="${jdbc_username}" />
+    <property name="password" value="${jdbc_password}" />
+
+    <!-- 初始化连接大小 -->
+    <property name="initialSize" value="1" />
+    <!-- 连接池最大使用连接数量 -->
+    <property name="maxActive" value="20" />
+    <!-- 连接池最小空闲 -->
+    <property name="minIdle" value="1" />
+    <!-- 获取连接最大等待时间 -->
+    <property name="maxWait" value="60000" />
+
+    <property name="poolPreparedStatements" value="true" /> <property 
+      name="maxPoolPreparedStatementPerConnectionSize" value="33" />
+    <property name="validationQuery" value="${validationQuery}" />
+    <property name="testOnBorrow" value="false" />
+    <property name="testOnReturn" value="false" />
+    <property name="testWhileIdle" value="true" />
+
+    <!-- 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒 -->
+    <property name="timeBetweenEvictionRunsMillis" value="60000" />
+    <!-- 配置一个连接在池中最小生存的时间，单位是毫秒 -->
+    <property name="minEvictableIdleTimeMillis" value="25200000" />
+
+    <!-- 打开removeAbandoned功能 -->
+    <property name="removeAbandoned" value="true" />
+    <!-- 1800秒，也就是30分钟 -->
+    <property name="removeAbandonedTimeout" value="1800" />
+    <!-- 关闭abanded连接时输出错误日志 -->
+    <property name="logAbandoned" value="true" />
+
+    <!-- 监控数据库 -->
+    <property name="filters" value="stat" />
+<!--    <property name="filters" value="mergeStat" /> -->
+
+  </bean>
+
+  <!-- dbcp data source -->
+<!--   <bean id="dataSource" class="org.apache.commons.dbcp2.BasicDataSource" destroy-method="close"> -->
+<!--     <property name="driverClassName" value="${jdbc_driverClassName}" /> -->
+<!--     <property name="url" value="${jdbc_url}" /> -->
+<!--     <property name="username" value="${jdbc_username}" /> -->
+<!--     <property name="password" value="${jdbc_password}" /> -->
+    
+<!--     <property name="initialSize" value="2" /> -->
+<!--     <property name="maxTotal" value="10" /> -->
+<!--     <property name="maxIdle" value="5" /> -->
+<!--     <property name="minIdle" value="2" /> -->
+<!--     <property name="poolPreparedStatements" value="true" /> -->
+<!--     <property name="defaultAutoCommit" value="true" /> -->
+<!--   </bean> -->
+  
+   
+  <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+    <property name="dataSource" ref="dataSource" />
+    <property name="configLocation" value="classpath:mybatis-config.xml" />
+  </bean>
+ 
+  <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+    <property name="basePackage"  value="com.uc.bpg.persistence" />
+    <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory" />
+  </bean>
+
+  <bean id="transactionManager"
+    class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+    <property name="dataSource" ref="dataSource" />
+  </bean>
+
+  <tx:advice id="transactionAdvice" transaction-manager="transactionManager">
+    <tx:attributes>
+      <tx:method name="add*" propagation="REQUIRED" rollback-for="java.lang.Exception"/>
+      <tx:method name="insert*" propagation="REQUIRED" rollback-for="java.lang.Exception" />
+      <tx:method name="update*" propagation="REQUIRED" rollback-for="java.lang.Exception" />
+      <tx:method name="del*" propagation="REQUIRED" rollback-for="java.lang.Exception" />
+      <tx:method name="modify*" propagation="REQUIRED" rollback-for="java.lang.Exception" />
+      <tx:method name="save*" propagation="REQUIRED" rollback-for="java.lang.Exception" />
+      <tx:method name="remove*" propagation="REQUIRED" rollback-for="java.lang.Exception" />
+      <tx:method name="cancel*" propagation="REQUIRED" rollback-for="java.lang.Exception" />
+      <tx:method name="reactive*" propagation="REQUIRED" rollback-for="java.lang.Exception" />
+      <tx:method name="select*" propagation="SUPPORTS" read-only="true"/>
+    </tx:attributes>
+  </tx:advice>
+
+  <aop:config>
+    <aop:pointcut expression="execution(* com.uc.web.service..*Service.*(..))" id="basePointcut"/>
+    <aop:pointcut id="transactionPointcut" expression="execution(* com.uc.bpg.service..*Impl.*(..))"  />
+    <aop:advisor advice-ref="transactionAdvice" pointcut-ref="basePointcut"/>
+    <aop:advisor advice-ref="transactionAdvice" pointcut-ref="transactionPointcut" />
+  </aop:config>
+
+  <!-- 配置druid监控spring jdbc -->
+  <bean id="druid-stat-interceptor"
+    class="com.alibaba.druid.support.spring.stat.DruidStatInterceptor">
+  </bean>
+  <bean id="druid-stat-pointcut" class="org.springframework.aop.support.JdkRegexpMethodPointcut"
+    scope="prototype">
+    <property name="patterns">
+      <list>
+        <value>com.uc.web.service.*</value>
+        <value>com.uc.app.zjjh.service.*</value>        
+      </list>
+    </property>
+  </bean>
+
+  <aop:config>
+    <aop:advisor advice-ref="druid-stat-interceptor"
+      pointcut-ref="druid-stat-pointcut" />
+  </aop:config>
+  
+  <aop:aspectj-autoproxy proxy-target-class="true" />
+		
+</beans>

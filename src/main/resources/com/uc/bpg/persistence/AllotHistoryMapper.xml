@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.uc.bpg.persistence.AllotHistoryMapper">
+  <resultMap id="allotHisDetail" type="com.uc.bpg.domain.AllotHistory">
+    <id column="ID" jdbcType="INTEGER" property="id" />
+    <result column="UUID" jdbcType="CHAR" property="uuid" />
+    <result column="OPERATION" jdbcType="CHAR" property="operation" />
+    <result column="DEVICE" jdbcType="INTEGER" property="device" />
+    <result column="HOTEL" jdbcType="INTEGER" property="hotel" />
+    <result column="ROOM" jdbcType="INTEGER" property="room" />
+    <result column="OPERATE_TIME" jdbcType="TIMESTAMP" property="operateTime" />
+    <result column="OPERATOR" jdbcType="INTEGER" property="operator" />
+    <result column="HOTEL_NAME" jdbcType="VARCHAR" property="hotelName"/>
+    <result column="ROOM_NO" jdbcType="VARCHAR" property="roomNo"/>
+    <result column="OPERATER_NAME" jdbcType="VARCHAR" property="operaterName"/>
+    
+  </resultMap>
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="selectSql">
+    select a.ID, a.DEVICE, a.HOTEL, a.ROOM, a.OPERATION, a.OPERATE_TIME, b.NAME as HOTEL_NAME, c.ROOM_NO as ROOM_NO, d.NAME as OPERATER_NAME
+    from t_allot_history a
+    left join t_orgnization b on b.ID=a.HOTEL
+    left join t_room c on c.ID = a.ROOM
+    left join t_user d on d.ID = a.OPERATOR
+  </sql>
+  <sql id="columns">
+    ID, DEVICE, HOTEL, ROOM, OPERATION, OPERATE_TIME, HOTEL_NAME, ROOM_NO, OPERATER_NAME
+  </sql>
+  <select id="selectByExample" parameterType="map" resultMap="allotHisDetail">
+    select
+    <include refid="columns" />
+    from (
+      <include refid="selectSql" />
+    ) t
+    <if test="example != null">
+      <include refid="Example_Where_Clause" />
+      <if test="example.orderByClause != null">
+        order by ${example.orderByClause}
+      </if>
+    </if>  
+    limit ${offset},${count}
+  </select>
+  <select id="selectById" parameterType="java.lang.Long" resultMap="allotHisDetail">
+    select 
+    <include refid="columns" />
+    from (
+      <include refid="selectSql" />
+    ) t
+    where ID = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteDetail" parameterType="java.lang.Long">
+    delete from t_allot_history
+    where ID = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insertDetail" parameterType="com.uc.bpg.domain.AllotHistory">
+    insert into t_allot_history (UUID, OPERATION, 
+      DEVICE, HOTEL, ROOM, 
+      OPERATE_TIME, OPERATOR)
+    values (#{uuid,jdbcType=CHAR}, #{operation,jdbcType=CHAR}, 
+      #{device,jdbcType=INTEGER}, #{hotel,jdbcType=INTEGER}, #{room,jdbcType=INTEGER}, 
+      #{operateTime,jdbcType=TIMESTAMP}, #{operator,jdbcType=INTEGER})
+  </insert>
+  <select id="selectCountByExample" parameterType="map" resultType="java.lang.Long">
+    select count(*) from (
+      <include refid="selectSql" />
+    ) t
+    <if test="example != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateDetailSelective" parameterType="com.uc.bpg.domain.AllotHistory">
+    update t_allot_history
+    <set>
+      <if test="operation != null">
+        OPERATION = #{operation,jdbcType=CHAR},
+      </if>
+      <if test="device != null">
+        DEVICE = #{device,jdbcType=INTEGER},
+      </if>
+      <if test="hotel != null">
+        HOTEL = #{hotel,jdbcType=INTEGER},
+      </if>
+      <if test="room != null">
+        ROOM = #{room,jdbcType=INTEGER},
+      </if>
+      <if test="operateTime != null">
+        OPERATE_TIME = #{operateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="operator != null">
+        OPERATOR = #{operator,jdbcType=INTEGER},
+      </if>
+    </set>
+    where ID = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateDetail" parameterType="com.uc.bpg.domain.AllotHistory">
+    update t_allot_history
+    set
+      OPERATION = #{operation,jdbcType=CHAR},
+      DEVICE = #{device,jdbcType=INTEGER},
+      HOTEL = #{hotel,jdbcType=INTEGER},
+      ROOM = #{room,jdbcType=INTEGER},
+      OPERATE_TIME = #{operateTime,jdbcType=TIMESTAMP},
+      OPERATOR = #{operator,jdbcType=INTEGER}
+    where ID = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

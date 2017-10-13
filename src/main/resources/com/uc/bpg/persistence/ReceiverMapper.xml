@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.uc.bpg.persistence.ReceiverMapper">
+
+<insert id="insertStatus" parameterType="com.uc.bpg.domain.DeviceStatus">
+  insert into t_device_status 
+  (DEVICE, SERIAL_NO, STATUS, BATTERY, REPORT_TIME)
+  values
+  (#{device,jdbcType=INTEGER}, #{mac,jdbcType=VARCHAR}, #{status,jdbcType=INTEGER}, 
+  #{battery,jdbcType=INTEGER}, #{reportTime, jdbcType=TIMESTAMP})
+</insert>
+
+<insert id="insertUsage" parameterType="com.uc.bpg.domain.DeviceUsage">
+  insert into t_device_usage 
+  (UUID, DEVICE, USE_TIME, ROOM, HOTEL, CHARGING, PAYED, CHARGE_STANDARD, CHARGE, RATIO, RENT, BILL, IN_BILL, PUBLIC_USAGE)
+  select #{uuid,jdbcType=CHAR}, #{device,jdbcType=INTEGER}, #{useTime,jdbcType=TIMESTAMP}, #{room, jdbcType=INTEGER},
+    #{hotel,jdbcType=INTEGER},null, false, a.CHARGE_STANDARD, a.CHARGE, a.RATIO,if(b.PUBLIC_USAGE, 0, a.CHARGE_STANDARD*a.RATIO), null, false, b.PUBLIC_USAGE 
+  <choose>
+    <when test="hotel !=null">
+      from t_orgnization a 
+      left join t_device b on b.ID=#{device,jdbcType=INTEGER}
+      where a.ID=#{hotel, jdbcType=INTEGER}
+    </when>
+    <otherwise>
+      from t_stratege a
+      left join t_device b on b.ID=#{device,jdbcType=INTEGER}
+      limit 1
+    </otherwise>
+  </choose>
+</insert>
+
+<insert id="insetBpData" parameterType="com.uc.bpg.domain.BpData">
+  insert into t_bp_data (DEVICE, EXAMINE_TIME, HI_PRESSURE, LOW_PRESSURE,HEART_BEAT_RATE, HEART_BEAT_ANNOTATION)
+  values(
+    #{device, jdbcType=INTEGER}, #{examineTime,jdbcType=TIMESTAMP}, 
+    #{highPressure,jdbcType=INTEGER}, #{lowPressure,jdbcType=INTEGER},
+    #{heartBeatRate, jdbcType=INTEGER},#{heartBeatAnnotation,jdbcType=INTEGER}
+  )
+</insert>
+
+</mapper>

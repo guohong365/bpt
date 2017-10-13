@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beansProjectDescription>
+	<version>1</version>
+	<pluginVersion><![CDATA[3.8.4.201703310634-RELEASE]]></pluginVersion>
+	<configSuffixes>
+		<configSuffix><![CDATA[xml]]></configSuffix>
+	</configSuffixes>
+	<enableImports><![CDATA[false]]></enableImports>
+	<configs>
+		<config>src/main/webapp/WEB-INF/spring/mapper-beans.xml</config>
+		<config>src/main/webapp/WEB-INF/spring/controller-beans.xml</config>
+		<config>src/main/webapp/WEB-INF/spring/service-beans.xml</config>
+		<config>src/main/webapp/WEB-INF/spring/root-context.xml</config>
+		<config>src/main/webapp/WEB-INF/spring/root-security.xml</config>
+		<config>src/main/webapp/WEB-INF/spring/appServlet/servlet-context.xml</config>
+		<config>src/main/webapp/WEB-INF/spring/utility-beans.xml</config>
+	</configs>
+	<autoconfigs>
+		<config>src/main/webapp/WEB-INF/spring/root-task.xml</config>
+	</autoconfigs>
+	<configSets>
+		<configSet>
+			<name><![CDATA[all]]></name>
+			<allowBeanDefinitionOverriding>true</allowBeanDefinitionOverriding>
+			<incomplete>false</incomplete>
+			<configs>
+				<config>src/main/webapp/WEB-INF/spring/root-context.xml</config>
+				<config>src/main/webapp/WEB-INF/spring/mapper-beans.xml</config>
+				<config>src/main/webapp/WEB-INF/spring/service-beans.xml</config>
+				<config>src/main/webapp/WEB-INF/spring/root-security.xml</config>
+				<config>src/main/webapp/WEB-INF/spring/controller-beans.xml</config>
+				<config>src/main/webapp/WEB-INF/spring/utility-beans.xml</config>
+				<config>src/main/webapp/WEB-INF/spring/appServlet/servlet-context.xml</config>
+				<config>src/main/webapp/WEB-INF/spring/root-task.xml</config>
+			</configs>
+			<profiles>
+			</profiles>
+		</configSet>
+	</configSets>
+</beansProjectDescription>

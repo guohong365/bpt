@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE generatorConfiguration PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN" "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">
+<generatorConfiguration>
+  <classPathEntry location="d:\Develop\Libs\m2\repository\mysql\mysql-connector-java\5.1.36\mysql-connector-java-5.1.36.jar"/>
+  <context id="haarpv2">
+    <jdbcConnection driverClass="com.mysql.jdbc.Driver" connectionURL="jdbc:mysql://localhost:3306/bpg" userId="root" password="1111" />
+    <javaModelGenerator targetPackage="com.uc.bpg.domain" targetProject="bpg/src/main/java">
+       <property name="enableSubPackages" value="true" />
+    </javaModelGenerator>
+    <sqlMapGenerator targetPackage="com.uc.bpg.persistence" targetProject="bpg/src/main/resources" >
+       <property name="enableSubPackages" value="true" />
+    </sqlMapGenerator>
+    <javaClientGenerator targetPackage="com.uc.bpg.persistence" targetProject="bpg/src/main/java" type="XMLMAPPER" >
+      <property name="enableSubPackages" value="true" />
+    </javaClientGenerator>
+<table schema="bpg" tableName="t_stratege" />
+<!-- 
+    <table schema="bpg" tableName="t_allot_his" />
+    <table schema="bpg"  tableName="t_bill" />
+    <table schema="bpg" tableName="t_charging_record" />
+    <table schema="bpg"  tableName="t_check_in_record" />
+    <table schema="bpg" tableName="t_device" />
+    <table schema="bpg" tableName="t_device_usage_record" />    
+    <table schema="bpg" tableName="t_function"  />
+    <table schema="bpg" tableName="t_hotel" />
+    <table schema="bpg" tableName="t_menu" />
+    <table schema="bpg" tableName="t_org" />
+    <table schema="bpg"  tableName="t_role" />
+    <table schema="bpg" tableName="t_role_func" />
+    <table schema="bpg" tableName="t_room" />
+    
+    <table schema="bpg" tableName="t_type" />
+    <table schema="bpg" tableName="t_user" />
+    <table schema="bpg" tableName="t_user_role" />
+    
+    
+    
+    <table schema="bpg" tableName="annual_report"></table>
+    <table schema="haarp" tableName="v_annual_report_detail"></table>    
+    <table schema="haarp" tableName="ex_work_employee"></table>    
+    <table schema="haarp" tableName="v_ex_work_employee_detail"></table>    
+
+    <table schema="haarp" tableName="article"></table>
+    <table schema="haarp" tableName="v_article_detail"></table>
+    
+    <table schema="haarp" tableName="modify_application"></table>
+    <table schema="haarp" tableName="modify_application_detail"></table>
+    <table schema="haarp" tableName="v_modify_application_list"></table>
+    <table schema="haarp" tableName="ex_work_record"></table>
+    <table schema="haarp" tableName="v_objects_detail"></table>
+    <table schema="haarp" tableName="v_ex_work_record_detail"></table>
+    -->
+  <!-- 模板视图,用来生成列映射。 实际不用
+    <table schema="haarp" tableName="v_stat_personal_workload_base"></table>
+    <table schema="haarp" tableName="v_stat_workload_base"></table>
+    <table schema="haarp" tableName="v_stat_annual_report_base"></table>    
+ -->
+  </context>
+</generatorConfiguration>

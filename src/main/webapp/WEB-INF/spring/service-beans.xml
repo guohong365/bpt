@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.1.xsd">
+
+	<!-- system service -->
+	<bean id="codesService" class="com.uc.bpg.service.impl.CodesServiceImpl">
+		<property name="mapper" ref="codesMapper" />
+	</bean>
+
+	<bean id="roleListService" class="com.uc.bpg.service.impl.RoleListServiceImpl">
+		<property name="mapper" ref="roleMapper" />
+	</bean>
+	<bean id="roleDetailService" class="com.uc.bpg.service.impl.RoleDetailServiceImpl">
+		<property name="mapper" ref="roleMapper" />
+	</bean>
+
+	<bean id="userListService" class="com.uc.bpg.service.impl.UserListServiceImpl">
+		<property name="mapper" ref="userMapper" />
+	</bean>
+	<bean id="userDetailService" class="com.uc.bpg.service.impl.UserDetailServiceImpl">
+		<property name="mapper" ref="userMapper" />
+	</bean>
+
+	<!-- security service -->
+	<bean id="securityService" class="com.uc.bpg.service.impl.SecurityServiceImpl">
+		<property name="userDetailMapper" ref="userMapper" />
+		<property name="orgnizaiontDetaillMapper" ref="orgnizationMapper" />
+		<property name="roleFunctionDefineMapper" ref="roleFunctionDefineMapper" />
+	</bean>
+
+	<bean id="dataReceiverService" class="com.uc.bpg.service.impl.DataReceiverServiceImpl">
+		<property name="deviceMapper" ref="deviceMapper" />
+		<property name="receiverMapper" ref="receiverMapper" />
+	</bean>
+
+	<bean id="deviceListService" class="com.uc.bpg.service.impl.DeviceListServiceImpl">
+		<property name="mapper" ref="deviceMapper" />
+		<property name="defaultOrderByClause" value="NAME, TYPE_NAME" />
+	</bean>
+	<bean id="deviceDetailService" class="com.uc.bpg.service.impl.DeviceDetailServiceImpl">
+		<property name="mapper" ref="deviceMapper" />
+		<property name="allotHistoryMapper" ref="allotHistoryMapper" />
+		<property name="hotelMapper" ref="hotelMapper" />
+		<property name="roomMapper" ref="roomMapper" />
+	</bean>
+  <bean id="allotListService" class="com.uc.bpg.service.impl.AllotHistoryListServiceImpl">
+    <property name="mapper" ref="allotHistoryMapper" />
+    <property name="defaultOrderByClause" value="OPERATE_TIME DESC" />
+  </bean>
+
+	<bean id="deviceTypeListService" class="com.uc.bpg.service.impl.DeviceTypeListServiceImpl">
+		<property name="mapper" ref="deviceTypeMapper" />
+		<property name="defaultOrderByClause" value="SHOW_ORDER" />
+	</bean>
+
+	<bean id="deviceTypeDetailService" class="com.uc.bpg.service.impl.DeviceTypeDetailServiceImpl">
+		<property name="mapper" ref="deviceTypeMapper" />
+	</bean>
+	
+	<bean id="strategeDetailService" class="com.uc.bpg.service.impl.StrategeDetailServiceImpl">
+	  <property name="mapper" ref="strategeMapper" /> 
+	</bean>
+
+	<bean id="hotelListService" class="com.uc.bpg.service.impl.HotelListServiceImpl">
+		<property name="mapper" ref="hotelMapper" />
+		<property name="defaultOrderByClause" value="CREATE_TIME DESC" />
+	</bean>
+	<bean id="hotelDetailService" class="com.uc.bpg.service.impl.HotelDetailServiceImpl">
+		<property name="mapper" ref="hotelMapper" />
+	</bean>
+
+	<bean id="accountListService" class="com.uc.bpg.service.impl.AccountListServiceImpl">
+		<property name="mapper" ref="billMapper" />
+		<property name="defaultOrderByClause" value="GENERATED_TIME DESC" />
+	</bean>
+	<bean id="accountDetailService" class="com.uc.bpg.service.impl.AccountDetailServiceImpl">
+		<property name="mapper" ref="billMapper" />
+	</bean>
+	
+	<bean id="deviceUsageListService" class="com.uc.bpg.service.impl.DeviceUsageListServiceImpl">
+	 <property name="mapper" ref="deviceUsageMapper" />
+	 <property name="defaultOrderByClause" value="USE_TIME DESC" />
+	</bean>	
+	
+	<bean id="receptionService" class="com.uc.bpg.service.impl.ReceptionServiceImpl">
+	 <property name="receptionMapper" ref="receptionMapper" />
+	 <property name="checkInMapper" ref="checkInMapper" />
+	 <property name="chargingMapper" ref="chargingMapper" />
+	</bean>
+	  <bean id="roomListService" class="com.uc.bpg.service.impl.RoomListServiceImpl">
+    <property name="mapper" ref="roomMapper" />
+  </bean>
+  <bean id="roomDetailService" class="com.uc.bpg.service.impl.RoomDetailServiceImpl">
+    <property name="mapper" ref="roomMapper" />
+  </bean>
+  
+  <bean id="checkInListService" class="com.uc.bpg.service.impl.CheckInListServiceImpl">
+    <property name="mapper" ref="checkInMapper" />
+    <property name="defaultOrderByClause" value="ROOM_NO" />
+  </bean>
+  <bean id="checkInDetailService" class="com.uc.bpg.service.impl.CheckInDetailServiceImpl">
+    <property name="mapper" ref="checkInMapper" />
+  </bean>
+  
+  <bean id="statisticBillService" class="com.uc.bpg.service.impl.StatisticBillListServiceImpl">
+    <property name="mapper" ref="statisticBillMapper" />
+  </bean>
+  
+  <bean id="demoService" class="com.uc.bpg.service.impl.DemoServiceImpl">
+    <property name="hotelMapper" ref="hotelMapper" />
+    <property name="billMapper" ref="billMapper" />
+    <property name="deviceMapper" ref="deviceMapper" />
+    <property name="usageMapper" ref="deviceUsageMapper" />
+    <property name="receiverMapper" ref="receiverMapper" />
+  </bean>
+  <bean id="examineService" class="com.uc.bpg.service.impl.ExamineListServiceImpl">
+  	<property name="mapper" ref="examineMapper" />
+  </bean>
+</beans>

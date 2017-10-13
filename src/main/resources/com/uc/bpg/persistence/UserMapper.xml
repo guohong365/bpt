@@ -1,0 +1,303 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.uc.bpg.persistence.UserMapper">
+  <resultMap id="userDetail" type="com.uc.bpg.domain.UserImpl">
+    <id column="ID" jdbcType="INTEGER" property="id" />
+    <result column="LOGIN_ID" jdbcType="VARCHAR" property="loginId" />
+    <result column="PASSWORD" jdbcType="VARCHAR" property="password" />
+    <result column="NAME" jdbcType="VARCHAR" property="name" />
+    <result column="TELE" jdbcType="VARCHAR" property="tele" />
+    <result column="EMAIL" jdbcType="VARCHAR" property="email" />
+    <result column="ADMIN_FLAG" jdbcType="BIT" property="adminFlag" />
+    <result column="ORG" jdbcType="INTEGER" property="org" />
+    <result column="CREATE_TIME" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="CREATER" jdbcType="INTEGER" property="creater" />
+    <result column="VALID" jdbcType="BIT" property="valid"/>
+    <result column="CANCEL_TIME" jdbcType="TIMESTAMP" property="cancelTime" />
+    <result column="CANCELATER" jdbcType="INTEGER" property="cancelater" />
+    <result column="DESCRIPTION" jdbcType="VARCHAR" property="description" />
+    <result column="ORG_NAME" jdbcType="VARCHAR" property="orgName"/>
+    <result column="ORG_TYPE" jdbcType="VARCHAR" property="orgType"/>
+    <result column="CREATER_NAME" jdbcType="VARCHAR" property="createrName"/>
+    <result column="CANCELATER_NAME" jdbcType="VARCHAR" property="cancelaterName"/>
+  </resultMap>
+  <resultMap type="com.uc.bpg.domain.RoleAvailable" id="roleAvailable">
+    <result column="ID" jdbcType="INTEGER" property="id" />
+    <result column="UUID" jdbcType="CHAR" property="uuid" />
+    <result column="NAME" jdbcType="VARCHAR" property="name" />
+    <result column="DESCRIPTION" jdbcType="VARCHAR" property="description" />
+    <result column="VALID" jdbcType="BIT" property="valid" />
+    <result column="INTERNAL" jdbcType="BIT" property="internal" />
+    <result column="AVAILABLE" jdbcType="BIT" property="available"/>    
+  </resultMap>
+  <resultMap type="com.uc.bpg.domain.MenuTreeItemImpl" id="mentTreeItem" >
+    <id column="ID" jdbcType="INTEGER" property="id" />
+    <result column="PARENT" jdbcType="INTEGER" property="parent" />
+    <result column="NAME" jdbcType="VARCHAR" property="name" />
+    <result column="ORDER" jdbcType="INTEGER" property="order" />
+    <result column="ICON" jdbcType="VARCHAR" property="icon" />
+    <result column="URI" jdbcType="VARCHAR" property="uri"/>
+    <result column="VALID" jdbcType="BIT" property="valid"/>  
+  </resultMap>  
+  
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="columns">
+    ID, LOGIN_ID, PASSWORD, NAME, TELE, EMAIL, ADMIN_FLAG, ORG, CREATE_TIME, CREATER, VALID,
+    CANCEL_TIME, CANCELATER, DESCRIPTION, ORG_NAME, ORG_TYPE, CREATER_NAME, CANCELATER_NAME    
+  </sql>
+  
+  <select id="selectByUuid" parameterType="java.lang.String" resultMap="userDetail">
+    select 
+    <include refid="columns" />
+    from (
+      <include refid="selectSql" />
+    ) t
+    where LOGIN_ID=#{uuid,jdbcType=CHAR}
+  </select>
+  
+  <select id="selectIdByUuid" parameterType="java.lang.String" resultType="java.lang.Long">
+    select ID from t_user where LOGIN_ID =#{uuid, jdbcType=CHAR}
+  </select>
+  
+  <select id="selectUserRoles" parameterType="map" resultMap="roleAvailable">
+  <choose>
+    <when test="userId !=null and userId &gt; 0">
+     select a.ID, a.UUID, a.NAME, a.VALID, a.DESCRIPTION, a.INTERNAL, if(b.USER is not null, TRUE, FALSE) as AVAILABLE    
+     from t_role a
+     left join t_user_role b on a.ID=b.ROLE and b.USER=#{userId, jdbcType=INTEGER}     
+     where a.VALID
+     <if test="!isAll">      
+     and not b.USER is null
+     </if> 
+    </when>
+    <otherwise>
+     select a.ID, a.UUID, a.NAME, a.VALID, a.DESCRIPTION, a.INTERNAL, false as AVAILABLE
+     from t_role a
+     where a.VALID  
+    </otherwise>
+  </choose>
+  </select>
+  
+  <select id="selectUserMenuItems" parameterType="java.lang.Long" resultMap="mentTreeItem">
+    select distinct a.ID, a.PARENT, a.NAME, a.ORDER, a.ICON, b.URI as URI
+    from t_menu a
+    left join t_function b     on b.ID = a.FUNC and b.VALID
+    left join t_role_func c    on c.FUNC=b.ID
+    left join t_role d         on d.ID = c.ROLE and d.VALID
+    left join t_user_role e    on e.ROLE = d.ID
+    left join t_user f         on f.ID = e.USER and f.VALID
+    where
+     a.VALID
+     and (a.FUNC is null or f.ID= #{userId, jdbcType=INTEGER})
+    order by a.ORDER
+  </select>
+  
+
+  <sql id="selectSql">
+     select a.ID, a.LOGIN_ID, a.PASSWORD, a.NAME, a.TELE, a.EMAIL, a.ADMIN_FLAG, 
+            a.ORG, a.CREATE_TIME, a.CREATER, a.VALID, a.CANCEL_TIME, a.CANCELATER, 
+            a.DESCRIPTION, b.NAME as ORG_NAME, b.TYPE as ORG_TYPE, c.NAME as CREATER_NAME,
+            d.NAME as CANCELATER_NAME 
+     from t_user a 
+     left join t_orgnization b on b.ID=a.ORG
+     left join t_user c on c.ID = a.CREATER
+     left join t_user d on d.ID = a.CANCELATER     
+  </sql>
+  <select id="selectByExample" parameterType="map" resultMap="userDetail">
+    select
+    <include refid="columns" />
+    from (
+     <include refid="selectSql" />
+    ) t
+    <if test="example != null">
+      <include refid="Example_Where_Clause" />
+      <if test="example.orderByClause != null">
+        order by ${example.orderByClause}
+      </if>
+    </if>  
+    limit ${offset},${count}
+  </select>
+  <select id="selectById" parameterType="java.lang.Long" resultMap="userDetail">
+    select 
+    <include refid="columns" />
+    from (
+      <include refid="selectSql" />
+    ) t
+    where ID = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteDetail" parameterType="java.lang.Long">
+    delete from t_user
+    where ID = #{id,jdbcType=INTEGER}
+  </delete>
+  <sql id="updateRoles">
+    <if test="roles!=null">
+      delete from t_user_role where USER=#{id,jdbcType=INTEGER};
+      <foreach collection="roles" item="role">
+        <if test="role.available">
+        insert into t_user_role (USER,ROLE) values (#{id,jdbcType=INTEGER},#{role.id,jdbcType=INTEGER});
+        </if>
+      </foreach>
+    </if>  
+  </sql>
+  <insert id="insertDetail" parameterType="com.uc.bpg.domain.UserImpl">
+    insert into t_user (LOGIN_ID, PASSWORD, 
+      NAME, TELE, EMAIL, 
+      ADMIN_FLAG, ORG, CREATE_TIME, 
+      CREATER, VALID, CANCEL_TIME, CANCELATER, 
+      DESCRIPTION)
+    values (#{loginId,jdbcType=VARCHAR}, #{password,jdbcType=VARCHAR}, 
+      #{name,jdbcType=VARCHAR}, #{tele,jdbcType=VARCHAR}, #{email,jdbcType=VARCHAR}, 
+      #{adminFlag,jdbcType=BIT}, #{org,jdbcType=INTEGER}, #{createTime,jdbcType=TIMESTAMP}, 
+      #{creater,jdbcType=INTEGER},true, null, null,   #{description,jdbcType=VARCHAR});
+    <foreach collection="roles" item="role">
+      <if test="role.available">
+      insert into t_user_role (USER,ROLE) select ID, ${role.id} from t_user where LOGIN_ID=#{loginId,jdbcType=VARCHAR};
+      </if>
+    </foreach>
+  </insert>
+  <select id="selectCountByExample" parameterType="map" resultType="java.lang.Long">
+    select count(*) from (
+     <include refid="selectSql" />
+    ) t
+    <if test="example != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  
+  <update id="updateDetailSelective" parameterType="com.uc.bpg.domain.UserImpl">
+    update t_user
+    <set>
+      <if test="password != null">
+        PASSWORD = #{password,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null">
+        NAME = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="tele != null">
+        TELE = #{tele,jdbcType=VARCHAR},
+      </if>
+      <if test="email != null">
+        EMAIL = #{email,jdbcType=VARCHAR},
+      </if>
+      <if test="adminFlag != null">
+        ADMIN_FLAG = #{adminFlag,jdbcType=BIT},
+      </if>
+      <if test="org != null">
+        ORG = #{org,jdbcType=INTEGER},
+      </if>
+      <if test="createTime != null">
+        CREATE_TIME = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="creater != null">
+        CREATER = #{creater,jdbcType=INTEGER},
+      </if>
+      <if test="valid !=null">
+        VALID =#{valid,jdbcType=BIT},
+      </if>
+      <if test="cancelTime != null">
+        CANCEL_TIME = #{cancelTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="cancelater != null">
+        CANCELATER = #{cancelater,jdbcType=INTEGER},
+      </if>
+      <if test="description != null">
+        DESCRIPTION = #{description,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where ID = #{id,jdbcType=INTEGER};
+    <include refid="updateRoles" />
+  </update>
+  <update id="updateDetail" parameterType="com.uc.bpg.domain.UserImpl">
+    update t_user
+    set 
+      PASSWORD = #{password,jdbcType=VARCHAR},
+      NAME = #{name,jdbcType=VARCHAR},
+      TELE = #{tele,jdbcType=VARCHAR},
+      EMAIL = #{email,jdbcType=VARCHAR},
+      ADMIN_FLAG = #{adminFlag,jdbcType=BIT},
+      ORG = #{org,jdbcType=INTEGER},
+      CREATE_TIME = #{createTime,jdbcType=TIMESTAMP},
+      CREATER = #{creater,jdbcType=INTEGER},
+      VALID = #{valid,jdbcType=BIT},
+      CANCEL_TIME = #{cancelTime,jdbcType=TIMESTAMP},
+      CANCELATER = #{cancelater,jdbcType=INTEGER},
+      DESCRIPTION = #{description,jdbcType=VARCHAR}
+    where ID = #{id,jdbcType=INTEGER};
+    <include refid="updateRoles" />
+  </update>
+  <sql id="optimizedSelectSqlWhere">
+    
+    <where>
+    <if test="queryForm !=null">
+       <trim prefixOverrides="and">
+         <if test="queryForm.queryLoginId !=null">
+           and a.LOGIN_ID like "${queryForm.queryLoginId}%"
+         </if>
+         <if test="queryForm.queryName !=null">
+           and a.NAME like "${queryForm.queryName}%"
+         </if>
+         <if test="queryForm.queryOrgName !=null">
+           and b.NAME like "${queryForm.queryOrgName}%"
+         </if>
+         <if test="queryForm.queryOrgType !=null">
+           and b.TYPE = #{queryForm.queryOrgType,jdbcType=VARCHAR}
+         </if>
+         <if test="queryForm.queryAll!=null and !queryForm.queryAll">
+           and a.VALID
+         </if>
+       </trim>
+    </if>
+    </where>
+  </sql>
+  <select id="selectOptimized" parameterType="map" resultMap="userDetail">
+    select 
+       a.ID, a.LOGIN_ID, a.PASSWORD, a.NAME, a.TELE, a.EMAIL, a.ADMIN_FLAG, 
+       a.ORG, a.CREATE_TIME, a.CREATER, a.VALID, a.CANCEL_TIME, a.CANCELATER, 
+       a.DESCRIPTION, b.NAME as ORG_NAME, b.TYPE as ORG_TYPE, c.NAME as CREATER_NAME,
+       d.NAME as CANCELATER_NAME
+    from t_user a 
+    left join t_orgnization b on b.ID=a.ORG
+    left join t_user c on c.ID = a.CREATER
+    left join t_user d on d.ID = a.CANCELATER
+    <include refid="optimizedSelectSqlWhere" />
+    <if test="queryForm !=null and queryForm.queryOrderByClause">
+       order by ${queryForm.queryOrderbyClause} 
+    </if>
+    limit ${offset}, ${count}    
+  </select>
+     
+  <select id="selectCountOptimized" parameterType="map" resultType="java.lang.Long">
+    select count(*) 
+    from t_user a 
+    left join t_orgnization b on b.ID=a.ORG
+    <include refid="optimizedSelectSqlWhere" />
+  </select>
+</mapper>

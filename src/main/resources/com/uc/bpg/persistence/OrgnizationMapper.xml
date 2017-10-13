@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.uc.bpg.persistence.OrgnizationMapper">
+  <resultMap id="orgnizationDetail" type="com.uc.bpg.domain.OrgnizationImpl">
+    <id column="ID" jdbcType="INTEGER" property="id" />
+    <result column="UUID" jdbcType="CHAR" property="uuid" />
+    <result column="PARENT" jdbcType="INTEGER" property="parent" />
+    <result column="NAME" jdbcType="VARCHAR" property="name" />
+    <result column="ADDRESS" jdbcType="VARCHAR" property="address" />
+    <result column="TELE" jdbcType="VARCHAR" property="tele" />
+    <result column="LINKMAN" jdbcType="VARCHAR" property="linkman" />
+    <result column="DESCRIPTION" jdbcType="VARCHAR" property="description" />
+    <result column="VALID" jdbcType="BIT" property="valid" />
+    <result column="CREATER" jdbcType="INTEGER" property="creater" />
+    <result column="CREATE_TIME" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="CANCELATER" jdbcType="INTEGER" property="cancelater"/>
+    <result column="CANCEL_TIME" jdbcType="TIMESTAMP" property="createTime"/>
+    <result column="TYPE" jdbcType="CHAR" property="type"/>
+    <result column="CREATER_NAME" jdbcType="VARCHAR" property="createrName"/>
+  </resultMap>
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="columns">
+    ID, UUID, PARENT, NAME, ADDRESS, TELE, LINKMAN, DESCRIPTION, VALID, CREATER, 
+    CREATE_TIME, TYPE
+  </sql>
+  <select id="selectByExample" parameterType="map" resultMap="orgnizationDetail">
+    select
+    <include refid="columns" />
+    from t_orgnization
+    <if test="example != null">
+      <include refid="Example_Where_Clause" />    
+      <if test="example.orderByClause != null">
+        order by ${example.orderByClause}
+      </if>  
+    </if>
+  </select>
+  <select id="selectById" parameterType="java.lang.Long" resultMap="orgnizationDetail">
+    select 
+    <include refid="columns" />
+    from t_orgnization
+    where ID = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteDetail" parameterType="com.uc.bpg.domain.OrgnizationImpl">
+    delete from t_orgnization
+    where ID = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insertDetail" parameterType="com.uc.bpg.domain.OrgnizationImpl">
+    insert into t_orgnization (UUID, PARENT, 
+      NAME, ADDRESS, 
+      TELE, LINKMAN, DESCRIPTION, 
+      VALID, CREATER, CREATE_TIME, TYPE
+      )
+    values (#{uuid,jdbcType=CHAR}, #{parent,jdbcType=INTEGER}, 
+      #{name,jdbcType=VARCHAR}, #{level,jdbcType=INTEGER}, #{address,jdbcType=VARCHAR}, 
+      #{tele,jdbcType=VARCHAR}, #{linkman,jdbcType=VARCHAR}, #{description,jdbcType=VARCHAR}, 
+      #{valid,jdbcType=BIT}, #{creator,jdbcType=INTEGER}, #{createTime,jdbcType=TIMESTAMP}
+      #{type,jdbcType=VARCHAR}
+      )
+  </insert>
+   <select id="selectCountByExample" parameterType="map" resultType="java.lang.Long">
+    select count(*) from t_orgnization
+    <if test="example != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateDetailSelective" parameterType="com.uc.bpg.domain.OrgnizationImpl">
+    update t_orgnization
+    <set>
+      <if test="parent != null">
+        PARENT = #{parent,jdbcType=INTEGER},
+      </if>
+      <if test="name != null">
+        NAME = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="address != null">
+        ADDRESS = #{address,jdbcType=VARCHAR},
+      </if>
+      <if test="tele != null">
+        TELE = #{tele,jdbcType=VARCHAR},
+      </if>
+      <if test="linkman != null">
+        LINKMAN = #{linkman,jdbcType=VARCHAR},
+      </if>
+      <if test="description != null">
+        DESCRIPTION = #{description,jdbcType=VARCHAR},
+      </if>
+      <if test="valid != null">
+        VALID = #{valid,jdbcType=BIT},
+      </if>
+      <if test="creator != null">
+        CREATER = #{creator,jdbcType=INTEGER},
+      </if>
+      <if test="createTime != null">
+        CREATE_TIME = #{createTime,jdbcType=TIMESTAMP},
+      </if>      
+    </set>
+    where ID = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateDetail" parameterType="com.uc.bpg.domain.OrgnizationImpl">
+    update t_orgnization
+    set
+      PARENT = #{parent,jdbcType=INTEGER},
+      NAME = #{name,jdbcType=VARCHAR},
+      ADDRESS = #{address,jdbcType=VARCHAR},
+      TELE = #{tele,jdbcType=VARCHAR},
+      LINKMAN = #{linkman,jdbcType=VARCHAR},
+      DESCRIPTION = #{description,jdbcType=VARCHAR},
+      VALID = #{valid,jdbcType=BIT},
+      CREATER = #{creator,jdbcType=INTEGER},
+      CREATE_TIME = #{createTime,jdbcType=TIMESTAMP}
+    where ID = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.uc.bpg.persistence.RoomMapper">
+  <resultMap id="roomDetail" type="com.uc.bpg.domain.Room">
+    <id column="ID" jdbcType="INTEGER" property="id" />
+    <result column="UUID" jdbcType="CHAR" property="uuid" />
+    <result column="HOTEL" jdbcType="INTEGER" property="hotel" />
+    <result column="STOREY" jdbcType="INTEGER" property="storey" />
+    <result column="ROOM_NO" jdbcType="VARCHAR" property="roomNo" />
+    <result column="DEVICE" jdbcType="INTEGER" property="device"/>
+    <result column="VALID" jdbcType="BIT" property="valid"/>
+    <result column="DEVICE_NAME" jdbcType="VARCHAR" property="deviceName"/>
+    <result column="DEVICE_SERIAL" jdbcType="VARCHAR" property="deviceSerial"/>
+    <result column="HOTEL_NAME" jdbcType="VARCHAR" property="hotelName"/>
+    <result column="DEVICE_STATUS" jdbcType="VARCHAR" property="deviceStatus"/>
+  </resultMap>
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="columns">
+    ID, UUID, HOTEL, STOREY, ROOM_NO,VALID, DEVICE,DEVICE_NAME, DEVICE_SERIAL,DEVICE_STATUS, HOTEL_NAME
+  </sql>
+  <sql id="selectSql">
+    select a.ID, a.UUID, a.HOTEL, a.STOREY, a.ROOM_NO, a.VALID,
+      b.ID as DEVICE, b.SERIAL_NO as DEVICE_SERIAL,
+      concat_ws(' ', c.PRODUCT,c.NAME) as DEVICE_NAME,  
+      d.STATUS as DEVICE_STATUS, e.NAME as HOTEL_NAME
+    from t_room a
+    left join t_device b on b.ROOM = a.ID
+    left join t_type c on c.ID=b.TYPE
+    left join t_device_status  d on d.DEVICE = b.ID  and d.ID=(select max(ID) from t_device_status where DEVICE=b.ID)
+    left join t_orgnization e on e.ID=a.HOTEL 
+  </sql>
+  <select id="selectByExample" parameterType="map" resultMap="roomDetail">
+    select
+    <include refid="columns" />
+    from (
+      <include refid="selectSql" />
+    ) t
+    <if test="example != null">
+      <include refid="Example_Where_Clause" />    
+    <if test="example.orderByClause != null">
+      order by ${example.orderByClause}
+   </if>    
+   </if>
+   limit ${offset},${count}
+  </select>
+  <select id="selectById" parameterType="java.lang.Long" resultMap="roomDetail">
+    select 
+    <include refid="columns" />
+    from (
+      <include refid="selectSql" />
+    ) t
+    where ID = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteDetail" parameterType="java.lang.Long">
+    delete from t_room
+    where ID = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insertDetail" parameterType="com.uc.bpg.domain.Room">
+    insert into t_room (UUID, HOTEL,  STOREY, ROOM_NO, VALID)
+    values (#{uuid,jdbcType=CHAR}, #{hotel,jdbcType=INTEGER}, 
+      #{storey,jdbcType=INTEGER}, #{roomNo,jdbcType=VARCHAR}, true)
+  </insert>
+  <select id="selectCountByExample" parameterType="map" resultType="java.lang.Long">
+    select count(*) from
+    (
+      <include refid="selectSql" />
+    ) t
+    <if test="example != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateDetailSelective" parameterType="com.uc.bpg.domain.Room">
+    update t_room
+    <set>
+      <if test="hotel != null">
+        HOTEL = #{hotel,jdbcType=INTEGER},
+      </if>
+      <if test="storey != null">
+        STOREY = #{storey,jdbcType=INTEGER},
+      </if>
+      <if test="roomNo != null">
+        ROOM_NO = #{roomNo,jdbcType=VARCHAR},
+      </if>
+      <if test="valid !=null">
+        VALID = #{valid, jdbcType=BIT},
+      </if>
+    </set>
+    where ID = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateDetail" parameterType="com.uc.bpg.domain.Room">
+    update t_room
+    set 
+      HOTEL = #{hotel,jdbcType=INTEGER},
+      STOREY = #{storey,jdbcType=INTEGER},
+      ROOM_NO = #{roomNo,jdbcType=VARCHAR},
+      VALID = #{valid, jdbcType=BIT}
+    where ID = #{id,jdbcType=INTEGER}
+  </update>
+  <select id="selectExistsRoom" parameterType="map" resultType="java.lang.Boolean">
+    select count(*) &gt; 0  from t_room where HOTEL=#{hotel,jdbcType=INTEGER} and STOREY=#{storey,jdbcType=INTEGER} and ROOM_NO=#{room,jdbcType=VARCHAR} 
+  </select>
+  <insert id="insertBatch" parameterType="map" >    
+    insert into t_room (UUID, HOTEL, STOREY, ROOM_NO, VALID)    
+    values
+    <trim suffixOverrides=",">    
+      <foreach collection="rooms" item="room" separator=",">
+        (#{room.uuid,jdbcType=CHAR},#{room.hotel,jdbcType=INTEGER},#{room.storey,jdbcType=INTEGER},#{room.roomNo,jdbcType=VARCHAR}, true)
+      </foreach>
+    </trim>
+  </insert>
+</mapper>

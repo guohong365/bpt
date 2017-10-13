@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.uc.bpg.persistence.StrategeHistoryMapper">
+  <resultMap id="strategeDetail" type="com.uc.bpg.domain.StrategeHistory">
+    <id column="ID" jdbcType="INTEGER" property="id" />
+    <result column="UUID" jdbcType="CHAR" property="uuid" />
+    <result column="HOTEL" jdbcType="INTEGER" property="hotel" />
+    <result column="TOTAL_DEVICE" jdbcType="INTEGER" property="totalDevice" />
+    <result column="PUBLIC_USAGE" jdbcType="INTEGER" property="publicUsage" />
+    <result column="CHARGE_STANDARD" jdbcType="DECIMAL" property="chargeStandard" />
+    <result column="CHARGE" jdbcType="DECIMAL" property="charge" />
+    <result column="RATIO" jdbcType="DECIMAL" property="ratio" />
+    <result column="BILLING_CYCLE" jdbcType="VARCHAR" property="billingCycle"/>
+    <result column="BILLING_DATE_PARAM1" jdbcType="INTEGER" property="billingDateParam1"/>
+    <result column="BILLING_DATE_PARAM2" jdbcType="INTEGER" property="billingDateParam2"/>
+    <result column="CREATER" jdbcType="INTEGER" property="creater" />
+    <result column="CREATE_TIME" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="MODIFIER" jdbcType="INTEGER" property="modifier"/>
+    <result column="MODIFY_TIME" jdbcType="TIMESTAMP" property="modifyTime"/>
+    <result column="MODIFIER_NAME" jdbcType="VARCHAR" property="modifierName"/>
+    <result column="HOTEL_NAME" jdbcType="VARCHAR" property="hotelName"/>
+  </resultMap>
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="columns">
+    ID, UUID, HOTEL, TOTAL_DEVICE, PUBLIC_USAGE, CHARGE_STANDARD, CHARGE, RATIO,
+    BILLING_CYCLE, BILLING_DATE_PARAM1, BILLING_DATE_PARAM2, 
+    CREATER, CREATE_TIME, MODIFIER, MODIFY_TIME,CREATOR_NAME, MODIFIER_NAME,
+    HOTEL_NAME
+  </sql>
+  <sql id="selectSql">
+    select a.ID, a.UUID, a.HOTEL, a.TOTAL_DEVICE, a.PUBLIC_USAGE, a.CHARGE_STANDARD, a.CHARGE, 
+    a.RATIO, a.BILLING_CYCLE, a.BILLING_DATE_PARAM1, a.BILLING_DATE_PARAM2, 
+    a.CREATER, a.CREATE_TIME, a.MODIFIER, a.MODIFY_TIME, b.NAME as CREATER_NAME, 
+    c.NAME as MODIFIER_NAME, d.NAME as HOTEL_NAME
+    form t_stratege_history a 
+    left join t_user b on b.ID= a.CREATER
+    left join t_user c on c.ID= a.MODIFIER
+    left join t_orgnization d on d.ID = a.HOTEL and d.TYPE='酒店';
+  </sql>
+  <select id="selectByExample" parameterType="map" resultMap="strategeDetail">
+    select
+    <include refid="columns" />
+    from (
+      <include refid="selectSql" />
+    ) t
+    <if test="example != null">
+      <include refid="Example_Where_Clause" />    
+    <if test="example.orderByClause != null">
+      order by ${example.orderByClause}
+    </if>
+    </if>
+    limit ${offset}, ${count}
+  </select>
+  <select id="selectById" parameterType="java.lang.Long" resultMap="strategeDetail">
+    select 
+    <include refid="columns" />
+    from t_stratege_history
+    where ID = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteDetail" parameterType="com.uc.bpg.domain.StrategeHistory">
+    delete from t_stratege_history
+    where ID = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insertDetail" parameterType="com.uc.bpg.domain.StrategeHistory">
+    insert into t_stratege_history (UUID, HOTEL, 
+      TOTAL_DEVICE, PUBLIC_USAGE, CHARGE_STANDARD, 
+      CHARGE, RATIO, BILLING_CYCLE, BILLING_DATE_PARAM1,
+      BILLING_DATE_PARAM2, CREATER,  CREATE_TIME,
+      MODIFIER, MODIFY_TIME)
+    values (#{uuid,jdbcType=CHAR}, #{hotel,jdbcType=INTEGER}, 
+      #{totalDevice,jdbcType=INTEGER}, #{publicUsage,jdbcType=INTEGER}, #{chargeStangard,jdbcType=DECIMAL}, 
+      #{charge,jdbcType=DECIMAL}, #{ratio,jdbcType=DECIMAL}, #{billingCycle, jdbcType=VARCHAR},
+      #{billingDateParam1, jdbcType=INTEGER},#{billingDateParam2, jdbcType=INTEGER},   
+      #{creater,jdbcType=INTEGER}, #{createTime,jdbcType=TIMESTAMP},
+      #{modifier, jdbcType=INTEGER}, #{modifyTime, jdbcType=TIMESTAMP})
+  </insert>
+  <select id="selectCountByExample" parameterType="map" resultType="java.lang.Long">
+    select count(*) from (
+      <include refid="selectSql" />
+    ) t
+    <if test="example != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateDetailSelective" parameterType="com.uc.bpg.domain.StrategeHistory">
+    update t_stratege_history
+    <set>
+      <if test="hotel != null">
+        HOTEL = #{hotel,jdbcType=INTEGER},
+      </if>
+      <if test="totalDevice != null">
+        TOTAL_DEVICE = #{totalDevice,jdbcType=INTEGER},
+      </if>
+      <if test="publicUsage != null">
+        PUBLIC_USAGE = #{publicUsage,jdbcType=INTEGER},
+      </if>
+      <if test="chargeStangard != null">
+        CHARGE_STANDARD = #{chargeStangard,jdbcType=DECIMAL},
+      </if>
+      <if test="charge != null">
+        CHARGE = #{charge,jdbcType=DECIMAL},
+      </if>
+      <if test="ratio != null">
+        RATIO = #{ratio,jdbcType=DECIMAL},
+      </if>
+      <if test="billingCycle!=null">
+        BILLING_CYCLE = #{billingCycle, jdbcType=VARCHAR},
+      </if>
+      <if test="billingDateParam1!=null">
+        BILLING_DATE_PARAM1=#{billingDateParam1, jdbcType=INTEGER},
+      </if>
+      <if test="billingDateParam2!=null">
+        BILLING_DATE_PARAM2=#{billingDateParam2, jdbcType=INTEGER},
+      </if>
+      <if test="creater != null">
+        CREATER = #{creater,jdbcType=INTEGER},
+      </if>
+      <if test="createTime != null">
+        CREATE_TIME = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="modifier!=null">
+        MODIFIER = #{modifier, jdbcType=INTEGER},
+      </if>
+      <if test="modifyTime!=null">
+        MODIFY_TIME = #{modifyTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where ID = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateDetail" parameterType="com.uc.bpg.domain.StrategeHistory">
+    update t_stratege_history
+    set
+      HOTEL = #{hotel,jdbcType=INTEGER},
+      TOTAL_DEVICE = #{totalDevice,jdbcType=INTEGER},
+      PUBLIC_USAGE = #{publicUsage,jdbcType=INTEGER},
+      CHARGE_STANDARD = #{chargeStangard,jdbcType=DECIMAL},
+      CHARGE = #{charge,jdbcType=DECIMAL},
+      RATIO = #{ratio,jdbcType=DECIMAL},
+      BILLING_CYCLE = #{billingCycle, jdbcType=VARCHAR},
+      BILLING_DATE_PARAM1 = #{billingDateParam1, jdbcType=INTEGER},
+      BILIING_DATE_PARAM2 = #{billingDateParam2, jdbcType=INTEGER},
+      CREATER = #{creater,jdbcType=INTEGER},
+      CREATE_TIME = #{createTime,jdbcType=TIMESTAMP},
+      MODIFIER = #{modifier,jdbcType=INTEGER},
+      MODIFY_TIME = #{modifyTime,jdbcType=TIMESTAMP}      
+    where ID = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

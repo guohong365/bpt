@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.1.xsd">
+
+	<!-- controller implement bean -->
+	<!-- system -->
+	<bean id="roleControllerBase" abstract="true">
+	 <property name="pageBasePath" value="/system/role" />
+	 <property name="moduleTitle" value="角色管理" />
+	 <property name="entityName" value="角色" />
+	</bean>
+	<bean id="roleDetailController" class="com.uc.bpg.controller.impl.RoleDetailControllerImpl" parent="roleControllerBase">
+		<property name="service" ref="roleDetailService" />
+	</bean>
+	<bean id="roleListController" class="com.uc.bpg.controller.impl.RoleListControllerImpl" parent="roleControllerBase">
+		<property name="service" ref="roleListService" />
+	</bean>
+
+  <bean id="userControllerBase" abstract="true">
+    <property name="pageBasePath" value="/system/user" />
+    <property name="moduleTitle" value="用户管理" />
+    <property name="entityName" value="用户" />
+  </bean>
+	<bean id="userListController" class="com.uc.bpg.controller.impl.UserListControllerImpl" parent="userControllerBase">
+		<property name="service" ref="userListService" />
+	</bean>
+	<bean id="userDetailController" class="com.uc.bpg.controller.impl.UserDetailControllerImpl" parent="userControllerBase">
+		<property name="service" ref="userDetailService" />
+		<property name="codesService" ref="codesService" />
+	</bean>
+
+	<!-- device -->
+	<bean id="backDeviceControllerBase" abstract="true">
+    <property name="pageBasePath" value="/background/device" />
+    <property name="moduleTitle" value="设备管理" />
+    <property name="entityName" value="设备" />	
+	</bean>
+	<bean id="backDeviceListController" class="com.uc.bpg.controller.impl.DeviceListControllerImpl" parent="backDeviceControllerBase">
+		<property name="service" ref="deviceListService" />
+		<property name="codesService" ref="codesService" />
+		<property name="exportorFactory" ref="deviceExportorFactory" />
+	</bean>
+	<bean id="deviceExportorFactory" class="com.uc.bpg.export.DeviceExportorFactory" />
+	
+	<bean id="backDeviceDetailController" class="com.uc.bpg.controller.impl.DeviceDetailControllerImpl" parent="backDeviceControllerBase">
+		<property name="listController" ref="allotListController" />
+		<property name="service" ref="deviceDetailService" />
+		<property name="codesService" ref="codesService" />
+		<property name="parser" ref="deviceBatchFileParser" />
+	</bean>
+	
+	
+	<bean id="allotListController" class="com.uc.bpg.controller.impl.AllotHistoryListControllerImpl">
+		<property name="service" ref="allotListService" />
+		<property name="deviceService" ref="deviceDetailService" />
+		<property name="pageBasePath" value="/common/allotHistory" />
+		<property name="exportorFactory" ref="allotHistoryExportorFactory" />
+	</bean>
+  <bean id="allotHistoryExportorFactory" class="com.uc.bpg.export.AllotHistoryExportorFactory" />
+
+	<!-- device type -->
+	<bean id="deviceTypeControllerBase" abstract="true">
+    <property name="pageBasePath" value="/background/type" />
+    <property name="moduleTitle" value="型号管理" />
+    <property name="entityName" value="型号" />
+  </bean>
+	
+	<bean id="deviceTypeListController" class="com.uc.bpg.controller.impl.DeviceTypeListControllerImpl" parent="deviceTypeControllerBase">
+		<property name="service" ref="deviceTypeListService" />
+	</bean>
+	<bean id="deviceTypeDetailController"	class="com.uc.bpg.controller.impl.DeviceTypeDetailControllerImpl" parent="deviceTypeControllerBase">
+		<property name="service" ref="deviceTypeDetailService" />
+	</bean>
+
+
+	<bean id="strategeDetailController" class="com.uc.bpg.controller.impl.StrategeDetailControllerImpl">
+		<property name="service" ref="strategeDetailService" />
+		<property name="moduleTitle" value="收费政策管理" />
+		<property name="entityName" value="收费政策" />
+		<property name="pageBasePath" value="/background/stratege" />
+	</bean>
+
+	<bean id="backHotelListController" class="com.uc.bpg.controller.impl.HotelListControllerImpl">
+		<property name="service" ref="hotelListService" />
+		<property name="pageBasePath" value="/background/hotel" />
+		<property name="moduleTitle" value="酒店管理" />
+		<property name="entityName" value="酒店" />
+		<property name="exportorFactory" ref="hotelExportorFactory" />
+	</bean>
+	<bean id="hotelExportorFactory" class="com.uc.bpg.export.HotelExportorFactory" />
+	<bean id="backHotelDetailController" class="com.uc.bpg.controller.impl.HotelDetailControllerImpl">
+		<property name="service" ref="hotelDetailService" />
+		<property name="pageBasePath" value="/background/hotel" />
+		<property name="moduleTitle" value="酒店管理" />
+		<property name="entityName" value="酒店" />
+	</bean>
+
+	<bean id="backAccountListController" class="com.uc.bpg.controller.impl.AccountListControllerImpl">
+		<property name="service" ref="accountListService" />
+		<property name="moduleTitle" value="账单管理" />
+		<property name="pageBasePath" value="/background/account" />
+		<property name="exportorFactory" ref="accountExportorFactory" />
+	</bean>
+	<bean id="accountExportorFactory" class="com.uc.bpg.export.AccountExportorFactory" />
+	<bean id="backAccountDetailController" class="com.uc.bpg.controller.impl.AccountDetailControllerImpl">
+		<property name="service" ref="accountDetailService" />
+		<property name="listController" ref="deviceUsageRecordListController" />
+		<property name="entityName" value="账单" />
+		<property name="pageBasePath" value="/background/account" />
+	</bean>
+	
+	<bean id="backStatisticBillController" class="com.uc.bpg.controller.impl.StatisticBillListControllerImpl">
+	  <property name="service" ref="statisticBillService" />
+	  <property name="moduleTitle" value="账务统计" />
+	  <property name="pageBasePath" value="/backgound/stat/bill" />
+	  <property name="exportorFactory" ref="backStatisticBillExportorFactory" />
+	</bean>
+	<bean id="backStatisticBillExportorFactory" class="com.uc.bpg.export.BackStatisticBillExportorFactory" />	
+
+  <bean id="hotelDeviceExportorFactory" class="com.uc.bpg.export.HotelDeviceExportorFactory" />
+  
+	<bean id="foreDeviceListController" class="com.uc.bpg.controller.impl.DeviceListControllerImpl">
+		<property name="foreground" value="true" />
+		<property name="codesService" ref="codesService" />
+		<property name="service" ref="deviceListService" />
+		<property name="queryFormClassName" value="com.uc.bpg.forms.DeviceQueryForm" />
+		<property name="pageBasePath" value="/hotel/device" />
+		<property name="moduleTitle" value="设备管理" />
+		<property name="exportorFactory" ref="hotelDeviceExportorFactory" />
+	</bean>
+	<bean id="foreDeviceDetailController" class="com.uc.bpg.controller.impl.DeviceDetailControllerImpl">
+		<property name="service" ref="deviceDetailService" />
+		<property name="entityClassName" value="com.uc.bpg.domain.Device" />
+		<property name="pageBasePath" value="/hotel/device" />
+		<property name="entityName" value="设备" />
+		<property name="foreground" value="true" />
+		<property name="listController" ref="allotListController" />
+	</bean>
+
+
+	<bean id="foreRoomDetailController" class="com.uc.bpg.controller.hotel.impl.RoomDetailControllerImpl">
+		<property name="service" ref="roomDetailService" />
+		<property name="entityClassName" value="com.uc.bpg.domain.Room" />
+		<property name="pageBasePath" value="/hotel/room" />
+		<property name="entityName" value="房间" />
+		<property name="moduleTitle" value="房间管理" />
+	</bean>
+	<bean id="foreRoomListController" class="com.uc.bpg.controller.hotel.impl.RoomListControllerImpl">
+		<property name="service" ref="roomListService" />
+		<property name="queryFormClassName" value="com.uc.bpg.forms.RoomQueryForm" />
+		<property name="pageBasePath" value="/hotel/room" />
+		<property name="entityName" value="房间" />
+		<property name="moduleTitle" value="房间管理" />
+	</bean>
+
+	<bean id="foreAccountListController" class="com.uc.bpg.controller.impl.AccountListControllerImpl">
+		<property name="foreground" value="true" />
+		<property name="service" ref="accountListService" />
+		<property name="pageBasePath" value="/hotel/account" />
+		<property name="moduleTitle" value="账单管理" />
+	</bean>
+	<bean id="foreAccountDetailController" class="com.uc.bpg.controller.impl.AccountDetailControllerImpl">
+	  <property name="foreground" value="true" />
+		<property name="service" ref="accountDetailService" />
+		<property name="listController" ref="deviceUsageRecordListController" />
+		<property name="pageBasePath" value="/hotel/account" />
+		<property name="entityName" value="账单" />
+	</bean>
+	<bean id="deviceUsageRecordListController"
+		class="com.uc.bpg.controller.impl.DeviceUsageRecordListControllerImpl">
+		<property name="service" ref="deviceUsageListService" />
+	</bean>
+	
+	<bean id="checkInExportorFacotry" class="com.uc.bpg.export.CheckInExportorFactory" />
+	<bean id="foreCheckInListController" class="com.uc.bpg.controller.hotel.impl.CheckInListControllerImpl">
+	 <property name="service" ref="checkInListService" />
+	 <property name="pageBasePath" value="/hotel/checkin" />
+	 <property name="moduleTitle" value="入住记录" />
+	 <property name="exportorFactory" ref="checkInExportorFacotry" />
+	</bean>
+	<bean id="foreCheckInDetailController" class="com.uc.bpg.controller.hotel.impl.CheckInDetailControllerImpl">
+	 <property name="service" ref="checkInDetailService" />
+	 <property name="pageBasePath" value="/hotel/checkin" />
+	 <property name="moduleTitle" value="入住记录" />
+	 <property name="entityName" value="入住记录" />
+	</bean>
+	
+	<bean id="examineListController" class="com.uc.bpg.controller.impl.ExamineListControllerImpl">
+	  <property name="service" ref="examineService" />
+	  <property name="pageBasePath" value="/examine" />
+	  <property name="moduleTitle" value="测试" />
+	  <property name="entityName" value="测试记录" />
+	</bean>
+</beans>

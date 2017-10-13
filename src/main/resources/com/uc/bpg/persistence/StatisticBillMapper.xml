@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.uc.bpg.persistence.StatisticBillMapper">
+  <resultMap id="StatBillDetail" type="com.uc.bpg.domain.StatisticBill">
+    <result column="GROUP_KEY" jdbcType="INTEGER" property="groupKey"/>
+    <result column="HOTEL" jdbcType="INTEGER" property="hotel"/>
+    <result column="BASIC_CHARGE" jdbcType="DECIMAL" property="chargedUseTimes" />
+    <result column="INCOME" jdbcType="DECIMAL" property="income" />
+    <result column="RENT" jdbcType="DECIMAL" property="rent" />
+    <result column="CHARGED_USAGE_TIMES" jdbcType="INTEGER" property="chargedUseTimes" />
+    <result column="PUBLIC_USAGE_TIMES" jdbcType="INTEGER" property="publicUseTimes" />
+    <result column="HOTEL_NAME" jdbcType="VARCHAR" property="hotelName" />    
+  </resultMap>
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="selectSql">
+    SELECT 
+    <if test="queryForm!=null">
+      <choose>
+        <when test="queryForm.groupMethod=='年'">
+          year(a.GENERATED_TIME) 
+        </when>
+        <when test="queryForm.groupMethod=='季'">
+          quarter(a.GENERATED_TIME)
+        </when>
+        <when test="queryForm.groupMethod=='月'">
+          month(a.GENERATED_TIME)
+        </when>
+      </choose>
+    </if>  
+      as `GROUP_KEY`,
+      a.HOTEL as `HOTEL`,
+      ifnull(sum(a.BASIC_CHARGE),0) as `BASIC_CHARGE`,
+      ifnull(sum(a.INCOME),0) as `INCOME`,
+      ifnull(sum(a.RENT),0) as `RENT`,
+      ifnull(b.PUBLIC_USAGE,0) as `PUBLIC_USAGE`,
+      ifnull(b.CHARGED_USAGE,0) as `CHARGED_USAGE`
+    FROM `t_bill` a
+    LEFT JOIN (
+      SELECT
+        s.HOTEL,
+        COUNT(DISTINCT id, s.PUBLIC_USAGE=true) AS PUBLIC_USAGE, 
+        COUNT(DISTINCT id, s.PUBLIC_USAGE!=true) as CHARGED_USAGE 
+      FROM t_device_usage s
+      <if test="queryForm!=null">
+      </if>
+   ) b ON b.HOTEL=a.HOTEL
+   <if test="queryForm!=null">
+   </if>
+   GROUP BY `GROUP_KEY`, a.HOTEL
+   WITH ROLLUP;    
+  </sql>
+  <sql id="columns">
+      GROUP_KEY, HOTEL, BASIC_CHARGE,INCOME,RENT, CHARGED_USAGE_TIMES, PUBLIC_USAGE_TIMES, HOTEL_NAME
+  </sql>
+  <select id="selectOptimized" parameterType="map" resultMap="StatBillDetail">
+    select
+    <include refid="columns" />
+    from (
+      <include refid="selectSql" />
+    ) t
+    <if test="queryForm != null and queryForm.orderByClause != null">
+        order by ${queryForm.orderByClause}
+    </if>
+    limit ${offset},${count}
+  </select>
+  
+  <select id="selectCountOptimized" parameterType="com.uc.bpg.forms.StatisticBillQueryForm" resultType="java.lang.Long">
+    select count(*) from (
+      <include refid="selectSql" />
+    ) t
+  </select>  
+</mapper>

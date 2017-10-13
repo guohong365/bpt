@@ -1,0 +1,290 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.uc.bpg.persistence.DeviceMapper">
+  <resultMap id="deviceDetail" type="com.uc.bpg.domain.Device">
+    <id column="ID" jdbcType="INTEGER" property="id" />
+    <result column="UUID" jdbcType="CHAR" property="uuid" />
+    <result column="SERIAL_NO" jdbcType="VARCHAR" property="serialNo" />
+    <result column="NAME" jdbcType="VARCHAR" property="name" />
+    <result column="VALID" jdbcType="BIT" property="valid" />
+    <result column="TYPE" jdbcType="INTEGER" property="type" />
+    <result column="HOTEL" jdbcType="INTEGER" property="hotel" />
+    <result column="ROOM" jdbcType="INTEGER" property="room" />
+    <result column="PUBLIC_USAGE" jdbcType="BIT" property="publicUsage" />
+    <result column="INPUTER" jdbcType="INTEGER" property="inputer"/>
+    <result column="INPUT_TIME" jdbcType="TIMESTAMP" property="inputTime"/>
+    <result column="MODIFIER" jdbcType="INTEGER" property="modifier"/>
+    <result column="MODIFY_TIME" jdbcType="TIMESTAMP" property="modifyTime"/>
+    <result column="INPUTER_NAME" jdbcType="VARCHAR" property="inputerName"/>
+    <result column="MODIFIER_NAME" jdbcType="VARCHAR" property="modifierName"/>
+    <result column="HOTEL_NAME" jdbcType="VARCHAR" property="hotelName"/>
+    <result column="TYPE_NAME" jdbcType="VARCHAR" property="typeName"/>
+    <result column="ROOM_NO" jdbcType="VARCHAR" property="roomNo"/>
+    <result column="STATUS" jdbcType="INTEGER" property="status"/>
+    <association property="canAllotPublic" column="HOTEL" notNullColumn="true" jdbcType="BIT" select="selectCanAllotPublic" />
+  </resultMap>
+  
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="baseSql">
+     select
+     a.ID, a.UUID, a.SERIAL_NO, a.VALID, a.TYPE, a.HOTEL, a.ROOM, a.PUBLIC_USAGE, a.INPUTER, a.INPUT_TIME, 
+     a.MODIFIER, a.MODIFY_TIME,     
+     b.NAME as TYPE_NAME, 
+     b.PRODUCT as NAME,
+     c.NAME as HOTEL_NAME, 
+     d.ROOM_NO as ROOM_NO,
+     (select if(STATUS=0 and BATTERY = 1, 15, STATUS) as STATUS from t_device_status where ID=(select max(ID) from t_device_status where DEVICE= a.ID)) as STATUS,
+     e.NAME as INPUTER_NAME,
+     f.NAME as MODIFIER_NAME
+     from t_device a
+     left join t_type b on a.type = b.id
+     left join t_orgnization c on a.hotel = c.id
+     left join t_room d on a.room = d.id  
+     left join t_user e on a.INPUTER = e.ID
+     left join t_user f on a.MODIFIER = f.ID
+  </sql>
+  <sql id="columns">
+    ID, UUID, SERIAL_NO, NAME, VALID, TYPE, HOTEL, ROOM, PUBLIC_USAGE, TYPE_NAME, HOTEL_NAME, ROOM_NO, STATUS,
+    INPUTER, INPUT_TIME, INPUTER_NAME, MODIFIER,MODIFY_TIME,MODIFIER_NAME 
+    
+  </sql>
+  <select id="selectByExample" parameterType="map" resultMap="deviceDetail">
+    select
+    <include refid="columns" />
+    from (
+      <include refid="baseSql" />
+    ) t
+    <if test="example != null">
+      <include refid="Example_Where_Clause" />
+      <if test="example.orderByClause != null">
+        order by ${example.orderByClause}
+      </if>  
+    </if>
+    limit ${offset}, ${count}
+  </select>
+  <select id="selectById" parameterType="java.lang.Long" resultMap="deviceDetail">
+    select 
+    <include refid="columns" />
+    from (
+     <include refid="baseSql" />
+    ) t
+    where ID = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteDetail" parameterType="java.lang.Long">
+    delete from t_device
+    where ID = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insertDetail" parameterType="com.uc.bpg.domain.Device">
+    insert into t_device (UUID, SERIAL_NO, VALID, TYPE, PUBLIC_USAGE, INPUTER, INPUT_TIME)
+    values (#{uuid,jdbcType=CHAR}, #{serialNo,jdbcType=VARCHAR}, true, 
+            #{type,jdbcType=INTEGER}, false, 
+            #{inputer,jdbcType=INTEGER}, #{inputTime, jdbcType=TIMESTAMP});
+    insert into t_allot_history
+      (UUID, OPERATION, DEVICE, HOTEL, ROOM, OPERATE_TIME, OPERATOR)
+      select uuid(), '新增', ID, null, null, #{inputTime,jdbcType=TIMESTAMP}, #{inputer,jdbcType=INTEGER} 
+      from t_device where UUID=#{uuid,jdbcType=CHAR};             
+  </insert>
+  <select id="selectCountByExample" parameterType="map" resultType="java.lang.Long">
+    select count(*) from (
+     <include refid="baseSql" />
+     ) t
+    <if test="example != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateDetailSelective" parameterType="com.uc.bpg.domain.Device">
+    update t_device
+    <set>
+      <if test="serialNo != null">
+        SERIAL_NO = #{serialNo,jdbcType=VARCHAR},
+      </if>
+      <if test="valid != null">
+        VALID = #{valid,jdbcType=BIT},
+      </if>
+      <if test="type != null">
+        TYPE = #{type,jdbcType=INTEGER},
+      </if>
+      <if test="hotel != null">
+        HOTEL = #{hotel,jdbcType=INTEGER},
+      </if>
+      <if test="room != null">
+        ROOM = #{room,jdbcType=INTEGER},
+      </if>
+      <if test="publicUsage != null">
+        PUBLIC_USAGE = #{publicUsage,jdbcType=BIT},
+      </if>
+      <if test="modifier !=null" >
+        MODIFIER = #{modifier, jdbcType=INTEGER},
+      </if>
+      <if test="modifyTime !=null">
+        MODIFY_TIME = #{modifyTime,jdbcType=TIMESTAMP},
+      </if>     
+    </set>
+    where ID = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateDetail" parameterType="com.uc.bpg.domain.Device">
+    update t_device
+    set 
+      SERIAL_NO = #{serialNo,jdbcType=VARCHAR},
+      VALID = #{valid,jdbcType=BIT},
+      TYPE = #{type,jdbcType=INTEGER},
+      HOTEL = #{hotel,jdbcType=INTEGER},
+      ROOM = #{room,jdbcType=INTEGER},
+      PUBLIC_USAGE = #{publicUsage,jdbcType=BIT},
+      MODIFIER=#{modifier,jdbcType=INTEGER},
+      MODIFY_TIME=#{modifyTime,jdbcType=TIMESTAMP}
+    where ID = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateAllot" parameterType="map">
+    update t_device
+    set
+      HOTEL = #{device.hotel,jdbcType=INTEGER},
+      ROOM = #{device.room,jdbcType=INTEGER},
+      PUBLIC_USAGE = #{device.publicUsage,jdbcType=BIT},
+      MODIFIER=#{device.modifier,jdbcType=INTEGER},
+      MODIFY_TIME=#{device.modifyTime,jdbcType=TIMESTAMP}
+    where ID = #{device.id,jdbcType=INTEGER};
+    insert into t_allot_history  (UUID, OPERATION, DEVICE, HOTEL, ROOM, OPERATE_TIME, OPERATOR)
+    values(uuid(), #{operation,jdbcType=CHAR}, #{device.id,jdbcType=INTEGER}, 
+    #{device.hotel,jdbcType=INTEGER}, #{device.room,jdbcType=INTEGER},
+    #{device.modifyTime,jdbcType=TIMESTAMP}, #{device.modifier,jdbcType=INTEGER});    
+  </update>
+  <insert id="insertBatchAdd" parameterType="map">
+    <foreach collection="devices" item="detail">  
+      insert into t_device 
+      (UUID, SERIAL_NO, VALID, TYPE, HOTEL, ROOM, PUBLIC_USAGE, INPUTER, INPUT_TIME)
+      values
+       (#{detail.uuid,jdbcType=CHAR}, #{detail.serialNo,jdbcType=VARCHAR}, true,
+        #{detail.type,jdbcType=INTEGER}, null, null, false, 
+        #{detail.inputer,jdbcType=INTEGER}, #{detail.inputTime, jdbcType=TIMESTAMP});
+      insert into t_allot_history
+      (UUID, OPERATION, DEVICE, HOTEL, ROOM, OPERATE_TIME, OPERATOR)
+      select uuid(), '新增', ID, null, null, #{detail.inputTime,jdbcType=TIMESTAMP}, #{detail.inputer,jdbcType=INTEGER} 
+      from t_device where UUID=#{detail.uuid,jdbcType=CHAR};  
+    </foreach>      
+  </insert>
+  <update id="updateBatchAllot" parameterType="map">
+    <foreach collection="devices" item="device">
+      update t_device 
+      set 
+      HOTEL=#{device.hotel,jdbcType=INTEGER},
+      ROOM =#{device.room,jdbcType=INTEGER},
+      MODIFY_TIME=#{device.modifyTime, jdbcType=TIMESTAMP},
+      MODIFIER=#{device.modifier,jdbcType=INTEGER}
+      where 
+      SERIAL_NO = #{device.serialNo,jdbcType=VARCHAR};
+      insert into t_allot_history
+      (UUID, OPERATION, DEVICE, HOTEL, ROOM, OPERATE_TIME, OPERATOR)
+      select uuid(), '分配', ID, #{device.hotel,jdbcType=INTEGER}, #{device.room,jdbcType=INTEGER}, 
+      #{device.modifyTime, jdbcType=TIMESTAMP},#{device.modifier,jdbcType=INTEGER}
+      from t_device where SERIAL_NO = #{device.serialNo,jdbcType=VARCHAR};
+    </foreach>
+  </update>
+  <update id="updateBatchWithdraw" parameterType="map">
+    <foreach collection="devices" item="device">
+      update t_device 
+      set 
+      HOTEL = null,
+      MODIFY_TIME=#{device.modifyTime, jdbcType=TIMESTAMP},
+      MODIFIER=#{device.modifier,jdbcType=INTEGER}
+      where SERIAL_NO=#{device.serialNo,jdbcType=VARCHAR};
+      insert into t_allot_history
+      (UUID, OPERATION, DEVICE, HOTEL, ROOM, OPERATE_TIME, OPERATOR)
+      select uuid(), '收回', ID, null, null, 
+      #{device.modifyTime, jdbcType=TIMESTAMP},#{device.modifier,jdbcType=INTEGER}
+      from t_device where SERIAL_NO = #{device.serialNo,jdbcType=VARCHAR};
+    </foreach>
+  </update>
+  <update id="updateBatchScrap" parameterType="map">
+    <foreach collection="devices" item="device">
+      update t_device 
+      set 
+      VALID = false, 
+      MODIFY_TIME=#{device.modifyTime, jdbcType=TIMESTAMP},
+      MODIFIER=#{device.modifier,jdbcType=INTEGER}
+      where SERIAL_NO=#{device.serialNo,jdbcType=VARCHAR};
+      insert into t_allot_history
+      (UUID, OPERATION, DEVICE, HOTEL, ROOM, OPERATE_TIME, OPERATOR)
+      select uuid(), '报废', ID, null, null, 
+      #{device.modifyTime, jdbcType=TIMESTAMP},#{device.modifier,jdbcType=INTEGER}
+      from t_device where SERIAL_NO = #{device.serialNo,jdbcType=VARCHAR};
+    </foreach>
+  </update>
+  <select id="selectExistsSerial" resultType="java.lang.Boolean" parameterType="map">
+    select count(*) &gt; 0 from t_device where SERIAL_NO=#{serial,jdbcType=VARCHAR}
+  </select>
+  <select id="selectAlreadyAllot" parameterType="map" resultType="java.lang.Boolean">
+    select count(*) &gt; 0 from t_device 
+    where 
+    SERIAL_NO=#{serial,jdbcType=VARCHAR}
+    <choose>
+      <when test="hotel != null">
+        and HOTEL = #{hotel,jdbcType=INTEGER}
+      </when>
+      <otherwise>
+        and HOTEL is not null
+      </otherwise>
+    </choose>    
+  </select>
+  <select id="selectAllocableRooms" parameterType="java.lang.Long" resultMap="com.uc.bpg.persistence.RoomMapper.roomDetail">
+    select ID, STOREY, ROOM_NO from t_room a
+    where VALID and HOTEL = #{hotelId,jdbcType=INTEGER} and not exists(select 1 from t_device where ROOM = a.ID) 
+  </select>
+  <select id="selectCanAllotPublic" parameterType="java.lang.Long" resultType="java.lang.Boolean">
+    select (select count(*) from t_device where HOTEL=#{hotel,jdbcType=INTEGER} and PUBLIC_USAGE) &lt; 
+           (select PUBLIC_USAGE from t_orgnization where ID=#{hotel,jdbcType=INTEGER})  
+  </select>
+  <select id="selectIdBySerial" parameterType="java.lang.String" resultType="java.lang.Long">
+    select ID from t_device where SERIAL_NO=#{serial,jdbcType=VARCHAR}
+  </select>
+  <select id="selectBySerial" parameterType="java.lang.String" resultMap="deviceDetail">
+    select 
+    <include refid="columns" />
+    from (
+      <include refid="baseSql" />
+    ) t 
+    where SERIAL_NO = #{serial,jdbcType=VARCHAR}
+  </select>
+  <update id="updateWithdrawAll" parameterType="map" >
+      <foreach collection="devices" item="device">
+      update t_device 
+      set 
+      ROOM = null,
+      MODIFY_TIME=#{device.modifyTime, jdbcType=TIMESTAMP},
+      MODIFIER=#{device.modifier,jdbcType=INTEGER}
+      where ID=#{device.id,jdbcType=VARCHAR};
+      insert into t_allot_history
+      (UUID, OPERATION, DEVICE, HOTEL, ROOM, OPERATE_TIME, OPERATOR)
+      values (uuid(), '收回', #{device.id, jdbcType=INTEGER}, #{device.hotel,jdbcType=INTEGER}, null, 
+      #{device.modifyTime, jdbcType=TIMESTAMP},#{device.modifier,jdbcType=INTEGER});
+    </foreach>
+  </update>
+</mapper>

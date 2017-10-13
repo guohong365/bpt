@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.uc.bpg.persistence.ReceptionMapper">
+  <resultMap id="checkInRecordDetail" type="com.uc.bpg.domain.CheckIn">
+    <id column="ID" jdbcType="INTEGER" property="id" />
+    <result column="UUID" jdbcType="CHAR" property="uuid" />
+    <result column="HOTEL" jdbcType="INTEGER" property="hotel" />
+    <result column="ROOM" jdbcType="INTEGER" property="room" />
+    <result column="CHECK_IN_TIME" jdbcType="TIMESTAMP" property="checkInTime" />
+    <result column="CHECK_IN_RECEPTIONIST" jdbcType="INTEGER" property="checkInReceptionist" />
+    <result column="CHECK_OUT_TIME" jdbcType="TIMESTAMP" property="checkOutTime" />
+    <result column="CHECK_OUT_RECEPTIONIST" jdbcType="INTEGER" property="checkOutReceptionist" />
+  </resultMap>
+  <resultMap id="chargingRecordDetail" type="com.uc.bpg.domain.ChargingDetails">
+    <id column="ID" jdbcType="INTEGER" property="id" />
+    <result column="UUID" jdbcType="CHAR" property="uuid" />
+    <result column="CHECK_IN_RECORD" jdbcType="INTEGER" property="checkIn" />
+    <result column="CHARGE" jdbcType="DECIMAL" property="charge" />
+    <result column="CHARGE_STANDARD" jdbcType="DECIMAL" property="chargeStandard"/>
+    <result column="RENT" jdbcType="DECIMAL" property="rent"/>
+    <result column="RECEPTIONIST" jdbcType="INTEGER" property="receptionist" />
+    <result column="CHARGING_TIME" jdbcType="TIMESTAMP" property="chargingTime" />
+    <collection property="usages" column="CHECK_IN_RECORD" select="selectUsageByCheckIn" />
+  </resultMap>
+  <resultMap type="com.uc.bpg.domain.RoomDetail" id="roomDetailMap">
+    <id column="ID" jdbcType="INTEGER" property="id"/>
+    <result column="STOREY" jdbcType="INTEGER" property="storey"/>
+    <result column="ROOM_NO" jdbcType="VARCHAR" property="roomNo"/>
+    <result column="CHECK_IN_TIME" jdbcType="TIMESTAMP" property="checkInTime"/>
+    <result column="CHECK_OUT_TIME" jdbcType="TIMESTAMP" property="checkOutTime"/>
+    <result column="CHARGE" jdbcType="DECIMAL" property="charge"/>
+    <result column="USE_TIMES" jdbcType="INTEGER" property="useTimes"/>
+  </resultMap>
+  <resultMap id="deviceUsageDetail" type="com.uc.bpg.domain.DeviceUsage">
+    <id column="ID" jdbcType="INTEGER" property="id" />
+    <result column="UUID" jdbcType="CHAR" property="uuid" />
+    <result column="DEVICE" jdbcType="INTEGER" property="device" />
+    <result column="USE_TIME" jdbcType="TIMESTAMP" property="useTime" />
+    <result column="ROOM" jdbcType="INTEGER" property="room" />
+    <result column="HOTEL" jdbcType="INTEGER" property="hotel" />
+    <result column="CHARGING" jdbcType="INTEGER" property="charging" />
+    <result column="PAYED" jdbcType="BIT" property="payed" />
+    <result column="CHARGE_STANDARD" jdbcType="DECIMAL" property="chargeStandard" />
+    <result column="CHARGE" jdbcType="DECIMAL" property="charge" />
+    <result column="RATIO" jdbcType="DECIMAL" property="ratio" />
+    <result column="BILL" jdbcType="INTEGER" property="bill" />
+    <result column="IN_BILL" jdbcType="BIT" property="inBill" />
+    <result column="DEVICE_NAME" jdbcType="VARCHAR" property="deviceName"/>
+    <result column="DEVICE_SERIAL" jdbcType="VARCHAR" property="deviceSerial"/>
+    <result column="ROOM_NO" jdbcType="VARCHAR" property="roomNo"/>        
+  </resultMap>
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <select id="selectUsageByCheckIn" parameterType="java.lang.Long" resultMap="deviceUsageDetail" >
+    select a.ID, a.CHARGE, a.USE_TIME, c.SERIAL_NO as DEVICE_SERIAL from t_device_usage a 
+    left join t_check_in b on b.ROOM = a.ROOM and b.ID=#{chekinId,jdbcType=INTEGER}
+    left join t_device c on c.ID = a.DEVICE
+    where a.USE_TIME &gt;= b.CHECK_IN_TIME
+  </select>
+  <select id="selectRoomLastCheckIn" parameterType="map" resultMap="checkInRecordDetail">
+    select a.ID as ROOM, a.HOTEL as HOTEL, c.ID as ID, c.CHECK_IN_TIME as CHECK_IN_TIME, c.CHECK_OUT_TIME as CHECK_OUT_TIME 
+    from t_room a 
+      left join (select ROOM, max(ID) as MAX_ID from t_check_in group by ROOM) b on b.ROOM=a.ID
+      left join t_check_in c on c.ID=MAX_ID
+    where a.HOTEL = #{hotel,jdbcType=INTEGER} and a.ROOM_NO = #{roomNo,jdbcType=VARCHAR} 
+  </select>
+
+  <select id="selectRoomCanCheckIn" parameterType="java.lang.Long" resultType="java.lang.Boolean">  
+    select (CHECK_OUT_TIME is not null) from t_check_in where ROOM = #{room, jdbcType=INTEGER} and ID = (select max(ID) from t_check_in)  
+  </select>
+    
+  <select id="selectChargingDetails" parameterType="java.lang.Long" resultMap="chargingRecordDetail">
+    select #{checkInId,jdbcType=INTEGER} as CHECK_IN_RECORD, ifnull(sum(a.CHARGE),0) as CHARGE,
+       ifnull(sum(a.CHARGE_STANDARD),0) as CHARGE_STANDARD, ifnull(sum(a.RENT),0) as RENT 
+    from t_device_usage a
+    left join t_check_in b on b.ID=#{checkInId,jdbcType=INTEGER} and b.ROOM=a.ROOM
+    where a.USE_TIME &gt;=b.CHECK_IN_TIME     
+  </select>
+
+  <update id="updateUsages" parameterType="map" >
+    update t_device_usage set PAYED=true, CHARGING=(select ID from t_charging where UUID=#{chargingUuid,jdbcType=VARCHAR})
+    where ID in 
+    <foreach collection="ids" item="id" open="(" close=")" separator=",">
+      #{id}
+    </foreach>
+  </update>  
+  <insert id="insertCheckOutCharging" parameterType="map">    
+    update t_check_in set CHECK_OUT_TIME=#{charging.chargingTime,jdbcType=TIMESTAMP}, CHECK_OUT_RECEPTIONIST=#{charging.receptionist,jdbcType=INTEGER}
+    where ID = #{charging.checkIn};    
+    insert into t_charging (UUID, HOTEL, CHECK_IN, CHARGE, CHARGE_STANDARD, RENT,RECEPTIONIST, CHARGING_TIME)     
+    select #{charging.uuid,jdbcType=CHAR}, #{charging.hotel,jdbcType=INTEGER}, #{charging.checkIn,jdbcType=INTEGER},
+           ifnull(sum(CHARGE),0), ifnull(sum(CHARGE_STANDARD),0), ifnull(sum(RENT),0), 
+           #{charging.receptionist,jdbcType=INTEGER}, #{charging.chargingTime, jdbcType=TIMESTAMP}
+    from t_device_usage
+    <where>
+      <if test="ids !=null and !ids.empty">
+        ID in 
+        <foreach collection="ids" item="id" open="(" close=")" separator=",">
+          #{id}
+        </foreach>
+      </if>
+    </where>;
+    <if test="ids !=null and !ids.empty">    
+      update t_device_usage set PAYED=true, CHARGING=(select ID from t_charging where UUID=#{charging.uuid})
+      where ID in 
+      <foreach collection="ids" item="id" open="(" close=")" separator=",">
+        #{id}
+      </foreach>;
+    </if>                      
+  </insert>
+</mapper>

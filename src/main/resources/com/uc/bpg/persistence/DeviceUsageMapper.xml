@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.uc.bpg.persistence.DeviceUsageMapper">
+  <resultMap id="deviceUsageDetail" type="com.uc.bpg.domain.DeviceUsage">
+    <id column="ID" jdbcType="INTEGER" property="id" />
+    <result column="UUID" jdbcType="CHAR" property="uuid" />
+    <result column="DEVICE" jdbcType="INTEGER" property="device" />
+    <result column="USE_TIME" jdbcType="TIMESTAMP" property="useTime" />
+    <result column="ROOM" jdbcType="INTEGER" property="room" />
+    <result column="HOTEL" jdbcType="INTEGER" property="hotel" />
+    <result column="CHARGING" jdbcType="INTEGER" property="charging" />
+    <result column="PAYED" jdbcType="BIT" property="payed" />
+    <result column="CHARGE_STANDARD" jdbcType="DECIMAL" property="chargeStandard" />
+    <result column="CHARGE" jdbcType="DECIMAL" property="charge" />
+    <result column="RATIO" jdbcType="DECIMAL" property="ratio" />
+    <result column="RENT" jdbcType="DECIMAL" property="rent"/>
+    <result column="BILL" jdbcType="INTEGER" property="bill" />
+    <result column="IN_BILL" jdbcType="BIT" property="inBill" />
+    <result column="PUBLIC_USAGE" jdbcType="BIT" property="publicUsage"/>
+    <result column="DEVICE_NAME" jdbcType="VARCHAR" property="deviceName"/>
+    <result column="DEVICE_SERIAL" jdbcType="VARCHAR" property="deviceSerial"/>
+    <result column="ROOM_NO" jdbcType="VARCHAR" property="roomNo"/>
+        
+  </resultMap>
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="column">
+    ID, UUID, DEVICE, USE_TIME, ROOM, HOTEL, CHARGING, PAYED, CHARGE_STANDARD, 
+    CHARGE, RATIO,RENT, BILL, IN_BILL,PUBLIC_USAGE, DEVICE_NAME, DEVICE_SERIAL, ROOM_NO
+  </sql>
+  <sql id="selectSql">
+   select a.ID, a.UUID, a.DEVICE, a.USE_TIME, a.ROOM, a.HOTEL, a.CHARGING, a.PAYED, a.CHARGE_STANDARD, 
+    a.CHARGE, a.RATIO, a.RENT, a.BILL,a.IN_BILL,a.PUBLIC_USAGE, concat_ws(' ', c.PRODUCT, c.NAME) as DEVICE_NAME, b.SERIAL_NO as DEVICE_SERIAL, d.ROOM_NO as ROOM_NO
+   from t_device_usage a 
+   left join t_device b on b.ID=a.DEVICE
+   left join t_type c on c.ID=b.TYPE
+   left join t_room d on d.ID=a.ROOM
+  </sql>
+  <select id="selectByExample" parameterType="map" resultMap="deviceUsageDetail">
+    select
+    <include refid="column" />
+    from (
+      <include refid="selectSql" />
+    ) t
+    <if test="example != null">
+      <include refid="Example_Where_Clause" />    
+      <if test="example.orderByClause != null">
+        order by ${example.orderByClause}
+      </if>
+    </if>
+    limit ${offset},${count}
+  </select>
+  <select id="selectById" parameterType="java.lang.Long" resultMap="deviceUsageDetail">
+    <include refid="selectSql" />
+    where a.ID = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteDetail" parameterType="com.uc.bpg.domain.DeviceUsage">
+    delete from t_device_usage
+    where ID = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insertDetail" parameterType="com.uc.bpg.domain.DeviceUsage">
+    insert into t_device_usage (UUID, DEVICE, 
+      USE_TIME, ROOM, HOTEL, 
+      CHARGING, PAYED,  
+      CHARGE_STANDARD, CHARGE, RATIO, RENT, 
+      BILL, IN_BILL, PUBLIC_USAGE)
+    values (#{uuid,jdbcType=CHAR}, #{device,jdbcType=INTEGER}, 
+      #{useTime,jdbcType=TIMESTAMP}, #{room,jdbcType=INTEGER}, #{hotel,jdbcType=INTEGER}, 
+      #{charging,jdbcType=INTEGER}, #{payed,jdbcType=BIT}, 
+      #{chargeStandard,jdbcType=DECIMAL}, #{charge,jdbcType=DECIMAL}, #{ratio,jdbcType=DECIMAL}, 
+      #{rent,jdbcType=DECIMAL},  #{bill,jdbcType=INTEGER}, #{inBill,jdbcType=BIT}
+      #{publicUsage,jdbcType=BIT})
+  </insert>
+  <select id="selectCountByExample" parameterType="map" resultType="java.lang.Long">
+    select count(*) from 
+    (
+      <include refid="selectSql" />
+    ) t
+    <if test="example != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateDetailSelective" parameterType="com.uc.bpg.domain.DeviceUsage">
+    update t_device_usage
+    <set>
+      <if test="device != null">
+        DEVICE = #{device,jdbcType=INTEGER},
+      </if>
+      <if test="useTime != null">
+        USE_TIME = #{useTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="room != null">
+        ROOM = #{room,jdbcType=INTEGER},
+      </if>
+      <if test="hotel != null">
+        HOTEL = #{hotel,jdbcType=INTEGER},
+      </if>
+      <if test="charging != null">
+        CHARGING = #{charging,jdbcType=INTEGER},
+      </if>
+      <if test="payed != null">
+        PAYED = #{payed,jdbcType=BIT},
+      </if>
+      <if test="chargeStandard != null">
+        CHARGE_STANDARD = #{chargeStandard,jdbcType=DECIMAL},
+      </if>
+      <if test="charge != null">
+        CHARGE = #{charge,jdbcType=DECIMAL},
+      </if>
+      <if test="ratio != null">
+        RATIO = #{ratio,jdbcType=DECIMAL},
+      </if>
+      <if test="rent !=null">
+        RENT = #{rent, jdbcType=DECIMAL},
+      </if>
+      <if test="bill != null">
+        BILL = #{bill,jdbcType=INTEGER},
+      </if>
+      <if test="inBill != null">
+        IN_BILL = #{inBill,jdbcType=BIT},
+      </if>
+      <if test="publicUsage!=null">
+        PUBLIC_USAGE = #{publicUsage,jdbcType=BIT}
+      </if>
+    </set>
+    where ID = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateDetail" parameterType="com.uc.bpg.domain.DeviceUsage">
+    update t_device_usage
+    set
+      DEVICE = #{device,jdbcType=INTEGER},
+      USE_TIME = #{useTime,jdbcType=TIMESTAMP},
+      ROOM = #{room,jdbcType=INTEGER},
+      HOTEL = #{hotel,jdbcType=INTEGER},
+      CHARGING = #{charging,jdbcType=INTEGER},
+      PAYED = #{payed,jdbcType=BIT},
+      CHARGE_STANDARD = #{chargeStandard,jdbcType=DECIMAL},
+      CHARGE = #{charge,jdbcType=DECIMAL},
+      RATIO = #{ratio,jdbcType=DECIMAL},
+      RENT=#{rent,jdbcType=DECIMAL},
+      BILL = #{bill,jdbcType=INTEGER},
+      IN_BILL = #{inBill,jdbcType=BIT},
+      PUBLIC_USAGE = #{publicUsage,jdbcType=BIT}
+    where ID = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

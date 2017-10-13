@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.uc.bpg.persistence.BillMapper">
+  <resultMap id="billDetail" type="com.uc.bpg.domain.Bill">
+    <id column="ID" jdbcType="INTEGER" property="id" />
+    <result column="UUID" jdbcType="CHAR" property="uuid" />
+    <result column="HOTEL" jdbcType="INTEGER" property="hotel"/>
+    <result column="BASIC_CHARGE" jdbcType="DECIMAL" property="basicCharge" />
+    <result column="INCOME" jdbcType="DECIMAL" property="income" />
+    <result column="RENT" jdbcType="DECIMAL" property="rent" />
+    <result column="STATE" jdbcType="CHAR" property="state" />
+    <result column="GENERATED_TIME" jdbcType="TIMESTAMP" property="generatedTime" />
+    <result column="PAY_TIME" jdbcType="TIMESTAMP" property="payTime" />
+    <result column="PAYER" jdbcType="INTEGER" property="payer" />
+    <result column="PAYER_NAME" jdbcType="VARCHAR" property="payerName"/>
+    <result column="VERIFY_TIME" jdbcType="TIMESTAMP" property="verifyTime" />
+    <result column="VERIFIER" jdbcType="INTEGER" property="verifier" />
+    <result column="VERIFIER_NAME" jdbcType="VARCHAR" property="verifierName"/>
+    <result column="HOTEL_NAME" jdbcType="VARCHAR" property="hotelName"/>
+  </resultMap>
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="selectSql">
+    select a.ID,a.UUID,a.HOTEL, a.BASIC_CHARGE,a.INCOME,a.RENT,a.STATE,a.GENERATED_TIME,a.PAY_TIME,
+      a.PAYER, b.NAME as PAYER_NAME,a.VERIFY_TIME,a.VERIFIER, c.NAME as VERIFIER_NAME, d.NAME as HOTEL_NAME
+    from t_bill a
+    left join t_user b on b.ID=a.PAYER
+    left join t_user c on c.ID=a.VERIFIER  
+    left join t_orgnization d on d.ID=a.HOTEL
+  </sql>
+  <sql id="columns">
+      ID,UUID,HOTEL, BASIC_CHARGE,INCOME,RENT,STATE,GENERATED_TIME,PAY_TIME,
+      PAYER,PAYER_NAME,VERIFY_TIME,VERIFIER,VERIFIER_NAME, HOTEL_NAME
+  </sql>
+  <select id="selectByExample" parameterType="map" resultMap="billDetail">
+    select
+    <include refid="columns" />
+    from (
+      <include refid="selectSql" />
+    ) t
+    <if test="example != null">
+      <include refid="Example_Where_Clause" />
+      <if test="example.orderByClause != null">
+        order by ${example.orderByClause}
+      </if>  
+    </if>
+    limit ${offset},${count}
+  </select>
+  <select id="selectById" parameterType="java.lang.Long" resultMap="billDetail">
+    select 
+    <include refid="columns" />
+    from (
+      <include refid="selectSql" />
+    ) t
+    where ID = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteDetail" parameterType="com.uc.bpg.domain.Bill">
+    delete from t_bill
+    where ID = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insertDetail" parameterType="com.uc.bpg.domain.Bill">
+    insert into t_bill (
+      UUID, HOTEL, BASIC_CHARGE, 
+      INCOME, RENT, STATE, 
+      GENERATED_TIME, PAY_TIME, PAYER, VERIFY_TIME, 
+      VERIFIER)
+    values (
+      #{uuid,jdbcType=CHAR},#{hotel,jdbcType=INTEGER} #{basicCharge,jdbcType=DECIMAL}, 
+      #{income,jdbcType=DECIMAL}, #{rent,jdbcType=DECIMAL}, #{state,jdbcType=CHAR}, 
+      #{generatedTime,jdbcType=TIMESTAMP}, #{payTime,jdbcType=TIMESTAMP}, #{payer,jdbcType=INTEGER}, 
+      #{verifyTime,jdbcType=TIMESTAMP}, #{verifier,jdbcType=INTEGER})
+  </insert>
+  <select id="selectCountByExample" parameterType="map" resultType="java.lang.Long">
+    select count(*) from (
+      <include refid="selectSql" />
+    ) t
+    <if test="example != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateDetailSelective" parameterType="com.uc.bpg.domain.Bill">
+    update t_bill
+    <set>
+      <if test="basicCharge != null">
+        BASIC_CHARGE = #{basicCharge,jdbcType=DECIMAL},
+      </if>
+      <if test="income != null">
+        INCOME = #{income,jdbcType=DECIMAL},
+      </if>
+      <if test="rent != null">
+        RENT = #{rent,jdbcType=DECIMAL},
+      </if>
+      <if test="state != null">
+        STATE = #{state,jdbcType=CHAR},
+      </if>
+      <if test="generatedTime != null">
+        GENERATED_TIME = #{generatedTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="payTime != null">
+        PAY_TIME = #{payTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="payer != null">
+        PAYER = #{payer,jdbcType=INTEGER},
+      </if>
+      <if test="verifyTime != null">
+        VERIFY_TIME = #{verifyTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="verifier != null">
+        VERIFIER = #{verifier,jdbcType=INTEGER},
+      </if>
+    </set>
+    where ID = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateDetail" parameterType="com.uc.bpg.domain.Bill">
+    update t_bill
+    set
+      BASIC_CHARGE = #{basicCharge,jdbcType=DECIMAL},
+      INCOME = #{income,jdbcType=DECIMAL},
+      RENT = #{rent,jdbcType=DECIMAL},
+      STATE = #{state,jdbcType=CHAR},
+      GENERATED_TIME = #{generatedTime,jdbcType=TIMESTAMP},
+      PAY_TIME = #{payTime,jdbcType=TIMESTAMP},
+      PAYER = #{payer,jdbcType=INTEGER},
+      VERIFY_TIME = #{verifyTime,jdbcType=TIMESTAMP},
+      VERIFIER = #{verifier,jdbcType=INTEGER}
+    where ID = #{id,jdbcType=INTEGER}
+  </update>
+  <insert id="insertGeneratedBill" parameterType="map">
+    insert into t_bill (UUID, HOTEL, BASIC_CHARGE, INCOME, RENT, STATE, GENERATED_TIME)
+    values (#{bill.uuid,jdbcType=CHAR}, #{bill.hotel,jdbcType=INTEGER}, #{bill.basicCharge,jdbcType=DECIMAL},
+    #{bill.income,jdbcType=DECIMAL}, #{bill.rent,jdbcType=DECIMAL}, #{bill.state,jdbcType=CHAR}, 
+    #{bill.generatedTime,jdbcType=TIMESTAMP});
+    <if test="usages!=null and !usages.empty">
+      update t_device_usage a left join t_bill b on b.UUID = #{bill.uuid,jdbcType=CHAR}
+      set a.IN_BILL=true, a.BILL=b.ID
+      where a.ID in 
+      <foreach collection="usages" item="usage" open="(" close=")" separator=",">
+        #{usage.id,jdbcType=INTEGER}
+      </foreach>      
+    </if> 
+  </insert>
+</mapper>
