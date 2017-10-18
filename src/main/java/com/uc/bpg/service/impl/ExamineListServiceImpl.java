@@ -24,6 +24,7 @@ public class ExamineListServiceImpl extends BusinessListServiceBase<ExamineQuery
 		if(queryFormType.getQueryTo()!=null){
 			condition.andFieldLessThanOrEqualTo("RECV_TIME", queryFormType.getQueryTo());
 		}
+		example.setOrderByClause("RECV_TIME desc");
 		return true;
 	}
 

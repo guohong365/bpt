@@ -174,7 +174,7 @@
 		</dependency>
 	</dependencies>
 	<build>
-		<finalName>bpg</finalName>
+		<finalName>bpt</finalName>
 		<plugins>
 			<plugin>
 				<artifactId>maven-eclipse-plugin</artifactId>

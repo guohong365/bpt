@@ -26,11 +26,11 @@
 	<!-- Application Loggers -->
 	
 	<logger name="com.uc">
-		<level value="trace" />
+		<level value="error" />
 	</logger>
 	
 	 <logger name="com.uc.bpg.test" additivity="false">
-    <level value="trace" />
+    <level value="error" />
     <appender-ref ref="console1"/>
   </logger>
 	
@@ -50,7 +50,7 @@
 	</logger>
 
 	<logger name="org.springframework.web">
-		<level value="trace" />
+		<level value="error" />
 	</logger>
 	
   <logger name="org.springframework.security">
