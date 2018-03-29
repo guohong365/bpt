@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE log4j:configuration PUBLIC "-//APACHE//DTD LOG4J 1.2//EN" "log4j.dtd">
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
+
+	<!-- Appenders -->
+	<appender name="console1" class="org.apache.log4j.ConsoleAppender">
+		<param name="Target" value="System.out" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="[test] %-5p: %c.%M[%L] - %m%n" />
+		</layout>
+	</appender>
+	 <appender name="console" class="org.apache.log4j.ConsoleAppender">
+    <param name="Target" value="System.out" />
+    <layout class="org.apache.log4j.PatternLayout">
+      <param name="ConversionPattern" value="[main] %-5p:%d{yyyy-MM-dd HH:mm:ss:SSS} %c - %m%n" />
+    </layout>
+  </appender>
+  
+	<appender name="logfile" class="org.apache.log4j.FileAppender">
+		<param name="File" value="app.log"/>
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%d{yyyy-MM-dd HH:mm:ss} %F %p %m%n"/>			
+		</layout>
+	</appender>
+
+	<!-- Application Loggers -->
+	
+	<logger name="com.uc">
+		<level value="error" />
+	</logger>
+	
+	 <logger name="com.uc.bpg.test" additivity="false">
+    <level value="error" />
+    <appender-ref ref="console1"/>
+  </logger>
+	
+	
+	<!-- 3rdparty Loggers -->
+	
+	<logger name="org.springframework.core">
+		<level value="error" />
+	</logger>
+
+	<logger name="org.springframework.beans">
+		<level value="error" />
+	</logger>
+	
+	<logger name="org.springframework.context">
+		<level value="error" />
+	</logger>
+
+	<logger name="org.springframework.web">
+		<level value="error" />
+	</logger>
+	
+  <logger name="org.springframework.security">
+    <level value="error" />
+  </logger>
+
+	<!-- Root Logger -->
+	<root>
+		<priority value="error" />
+		<appender-ref ref="console" />
+	</root>
+	
+</log4j:configuration>

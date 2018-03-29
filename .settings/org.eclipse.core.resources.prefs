@@ -1,3 +1,4 @@
 eclipse.preferences.version=1
 encoding//src/main/doc/batch_add.txt=gbk
-encoding//src/main/resources/bpg.properties=UTF-8
+encoding//src/main/resources/debug/bpg.properties=UTF-8
+encoding//src/main/resources/test/bpg.properties=UTF-8
